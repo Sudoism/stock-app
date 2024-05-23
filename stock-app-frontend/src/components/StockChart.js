@@ -10,7 +10,11 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
     // Load the data from the CSV file
     d3.csv('/tesla_stock_data_2_years.csv').then(data => {
       data.forEach(d => {
-        d.date = d3.timeParse("%Y-%m-%d")(d.date.split('T')[0]);
+        const parsedDate = d3.timeParse("%Y-%m-%d")(d.date.split('T')[0]);
+        if (!parsedDate) {
+          console.error('Failed to parse data date:', d.date);
+        }
+        d.date = parsedDate;
         d.price = +d.price;
       });
       setData(data);
@@ -62,20 +66,24 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
     // Add circles for notes
     notes.forEach(note => {
       const noteDate = d3.timeParse("%Y-%m-%d")(note.date);
-      if (noteDate) {
-        const noteData = data.find(d => d.date.getTime() === noteDate.getTime());
-        if (noteData) {
-          svg.append('circle')
-            .attr('cx', x(noteData.date))
-            .attr('cy', y(noteData.price))
-            .attr('r', 5)
-            .attr('fill', selectedNote && selectedNote.id === note.id ? 'red' : 'blue')
-            .on('click', (event) => {
-              event.stopPropagation();
-              setSelectedNote(note);
-            });
-        }
+      if (!noteDate) {
+        console.error('Failed to parse note date:', note.date);
+        return;
       }
+      const noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
+      if (!noteData) {
+        console.warn('No matching data point found for note date:', note.date);
+        return;
+      }
+      svg.append('circle')
+        .attr('cx', x(noteData.date))
+        .attr('cy', y(noteData.price))
+        .attr('r', 5)
+        .attr('fill', selectedNote && selectedNote.id === note.id ? 'red' : 'blue')
+        .on('click', (event) => {
+          event.stopPropagation();
+          setSelectedNote(note);
+        });
     });
 
     // Add click event on the svg to deselect note
