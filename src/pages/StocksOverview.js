@@ -39,7 +39,9 @@ const StocksOverview = () => {
               <td className="py-2 px-4">{stock.name}</td>
               <td className="py-2 px-4">{stock.ticker}</td>
               <td className="py-2 px-4">{stock.price}</td>
-              <td className="py-2 px-4"><Link to={`/stocks/${stock.id}`} className="text-blue-500">Details</Link></td>
+              <td className="py-2 px-4">
+                <Link to={`/stocks/${stock.ticker}`} className="text-blue-500">Details</Link>
+              </td>
             </tr>
           ))}
         </tbody>

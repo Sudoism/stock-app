@@ -16,7 +16,14 @@ app.use(bodyParser.json());
 const Stock = require('./models/stock')(sequelize, DataTypes);
 const Note = require('./models/note')(sequelize, DataTypes);
 
-sequelize.sync();
+// Sync the database
+sequelize.sync()
+  .then(() => {
+    console.log('Database synced successfully.');
+  })
+  .catch(err => {
+    console.error('Error syncing database:', err);
+  });
 
 const stockRoutes = require('./routes/stocks');
 const noteRoutes = require('./routes/notes');

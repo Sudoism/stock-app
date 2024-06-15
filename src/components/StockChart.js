@@ -7,14 +7,9 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Load the data from the CSV file
     d3.csv('/tesla_stock_data_2_years.csv').then(data => {
       data.forEach(d => {
-        const parsedDate = d3.timeParse("%Y-%m-%d")(d.date.split('T')[0]);
-        if (!parsedDate) {
-          console.error('Failed to parse data date:', d.date);
-        }
-        d.date = parsedDate;
+        d.date = d3.timeParse("%Y-%m-%d")(d.date.split('T')[0]);
         d.price = +d.price;
       });
       setData(data);
@@ -63,18 +58,11 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
       .attr('stroke-width', 1.5)
       .attr('d', line);
 
-    // Add circles for notes
     notes.forEach(note => {
       const noteDate = d3.timeParse("%Y-%m-%d")(note.date);
-      if (!noteDate) {
-        console.error('Failed to parse note date:', note.date);
-        return;
-      }
+      if (!noteDate) return;
       const noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
-      if (!noteData) {
-        console.warn('No matching data point found for note date:', note.date);
-        return;
-      }
+      if (!noteData) return;
       svg.append('circle')
         .attr('cx', x(noteData.date))
         .attr('cy', y(noteData.price))
@@ -86,7 +74,6 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
         });
     });
 
-    // Add click event on the svg to deselect note
     svg.on('click', () => setSelectedNote(null));
   }, [data, notes, selectedNote, setSelectedNote]);
 

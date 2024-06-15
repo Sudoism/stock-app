@@ -2,9 +2,9 @@ import React from 'react';
 
 function NotesPane({ selectedNote, updateNote, deleteNote }) {
   const handleEditNote = () => {
-    const text = prompt('Edit your note:', selectedNote.text);
+    const text = prompt('Edit your note:', selectedNote.content);
     if (text !== null) {
-      updateNote({ ...selectedNote, text });
+      updateNote({ ...selectedNote, content: text });
     }
   };
 
@@ -19,7 +19,7 @@ function NotesPane({ selectedNote, updateNote, deleteNote }) {
   return (
     <div className="w-1/3 p-4 bg-white">
       <h2 className="text-xl font-bold">{selectedNote.date}</h2>
-      <p>{selectedNote.text}</p>
+      <p>{selectedNote.content}</p>
       <button
         className="bg-yellow-500 text-white p-2 mt-2"
         onClick={handleEditNote}
