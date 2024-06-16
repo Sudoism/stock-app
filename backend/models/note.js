@@ -1,3 +1,4 @@
+// models/note.js
 module.exports = (sequelize, DataTypes) => {
     const Note = sequelize.define('Note', {
       id: {
@@ -11,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       content: {
         type: DataTypes.TEXT,
+        allowNull: false,
+      },
+      noteDate: {
+        type: DataTypes.DATE,
         allowNull: false,
       },
     });

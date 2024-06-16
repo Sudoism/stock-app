@@ -1,61 +1,50 @@
+// AddNoteModal.js
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
-Modal.setAppElement('#root'); // Ensure accessibility for screen readers
+const AddNoteModal = ({ isOpen, onRequestClose, addNote }) => {
+  const [content, setContent] = useState('');
+  const [noteDate, setNoteDate] = useState('');
 
-function AddNoteModal({ isOpen, onRequestClose, addNote }) {
-  const [noteContent, setNoteContent] = useState('');
-  const [noteDate, setNoteDate] = useState(new Date().toISOString().split('T')[0]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addNote({
-      date: noteDate,
-      content: noteContent,
-    });
-    setNoteContent('');
-    onRequestClose();
+    if (content && noteDate) {
+      await addNote({
+        content,
+        noteDate,
+      });
+      setContent('');
+      setNoteDate('');
+      onRequestClose();
+    }
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={onRequestClose}
-      contentLabel="Add Note"
-      className="modal"
-      overlayClassName="overlay"
-    >
-      <h2 className="text-xl font-bold mb-4">Add Note</h2>
+    <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
+      <h2>Add Note</h2>
       <form onSubmit={handleSubmit}>
-        <label className="block mb-2">
-          Date
+        <div>
+          <label>Date</label>
           <input
             type="date"
             value={noteDate}
             onChange={(e) => setNoteDate(e.target.value)}
-            className="py-2 px-4 border rounded mb-2"
+            required
           />
-        </label>
-        <label className="block mb-2">
-          Note
-          <input
-            type="text"
-            value={noteContent}
-            onChange={(e) => setNoteContent(e.target.value)}
-            className="py-2 px-4 border rounded mb-2"
-          />
-        </label>
-        <div className="flex justify-between">
-          <button type="button" onClick={onRequestClose} className="py-2 px-4 bg-red-500 text-white rounded">
-            Cancel
-          </button>
-          <button type="submit" className="py-2 px-4 bg-blue-500 text-white rounded">
-            Add Note
-          </button>
         </div>
+        <div>
+          <label>Note</label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Add Note</button>
+        <button type="button" onClick={onRequestClose}>Cancel</button>
       </form>
     </Modal>
   );
-}
+};
 
 export default AddNoteModal;

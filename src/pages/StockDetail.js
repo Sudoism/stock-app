@@ -3,12 +3,14 @@ import { useParams } from 'react-router-dom';
 import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
 import StockChart from '../components/StockChart';
 import NotesPane from '../components/NotesPane';
+import AddNoteModal from '../components/AddNoteModal';
 
 const StockDetail = () => {
   const { ticker } = useParams();
   const [stock, setStock] = useState(null);
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchStock = async () => {
@@ -33,12 +35,11 @@ const StockDetail = () => {
     fetchNotes();
   }, [ticker]);
 
-  const handleAddNote = async (note) => {
+  const addNote = async (note) => {
     try {
       const response = await createNote({
+        ...note,
         stockId: stock.id,
-        date: note.date,
-        content: note.content,
       });
       setNotes([...notes, response.data]);
     } catch (error) {
@@ -46,44 +47,50 @@ const StockDetail = () => {
     }
   };
 
-  const handleUpdateNote = async (updatedNote) => {
+  const updateExistingNote = async (note) => {
     try {
-      await updateNote(updatedNote);
-      setNotes(notes.map(note => (note.id === updatedNote.id ? updatedNote : note)));
-      setSelectedNote(null);
+      await updateNote(note);
+      setNotes(notes.map((n) => (n.id === note.id ? note : n)));
     } catch (error) {
       console.error('Failed to update note:', error);
     }
   };
 
-  const handleDeleteNote = async (id) => {
+  const deleteExistingNote = async (id) => {
     try {
       await deleteNote(id);
-      setNotes(notes.filter(note => note.id !== id));
-      setSelectedNote(null);
+      setNotes(notes.filter((note) => note.id !== id));
     } catch (error) {
       console.error('Failed to delete note:', error);
     }
   };
 
   return (
-    <div className="container mx-auto p-4 flex">
+    <div className="container mx-auto p-4">
       {stock ? (
         <>
-          <div className="w-2/3 p-4">
-            <h1 className="text-2xl font-bold mb-4">{stock.name} Stock Chart</h1>
-            <StockChart
-              stock={stock}
-              notes={notes}
-              addNote={handleAddNote}
-              setSelectedNote={setSelectedNote}
-              selectedNote={selectedNote}
-            />
-          </div>
+          <h1 className="text-2xl font-bold mb-4">{stock.name} Stock Chart</h1>
+          <StockChart
+            stock={stock}
+            notes={notes}
+            selectedNote={selectedNote}
+            setSelectedNote={setSelectedNote}
+          />
           <NotesPane
             selectedNote={selectedNote}
-            updateNote={handleUpdateNote}
-            deleteNote={handleDeleteNote}
+            updateNote={updateExistingNote}
+            deleteNote={deleteExistingNote}
+          />
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="mt-4 p-2 bg-blue-500 text-white rounded"
+          >
+            Add Note
+          </button>
+          <AddNoteModal
+            isOpen={isModalOpen}
+            onRequestClose={() => setIsModalOpen(false)}
+            addNote={addNote}
           />
         </>
       ) : (

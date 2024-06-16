@@ -9,7 +9,11 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
   useEffect(() => {
     d3.csv('/tesla_stock_data_2_years.csv').then(data => {
       data.forEach(d => {
-        d.date = d3.timeParse("%Y-%m-%d")(d.date.split('T')[0]);
+        const parsedDate = d3.timeParse("%Y-%m-%d")(d.date.split('T')[0]);
+        if (!parsedDate) {
+          console.error('Failed to parse data date:', d.date);
+        }
+        d.date = parsedDate;
         d.price = +d.price;
       });
       setData(data);
@@ -58,11 +62,20 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
       .attr('stroke-width', 1.5)
       .attr('d', line);
 
+    // Add circles for notes
     notes.forEach(note => {
-      const noteDate = d3.timeParse("%Y-%m-%d")(note.date);
-      if (!noteDate) return;
+      // Split the date string to get only the date part if it includes time
+      const dateString = note.noteDate.split('T')[0];
+      const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
+      if (!noteDate) {
+        console.error('Failed to parse note date:', note.noteDate);
+        return;
+      }
       const noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
-      if (!noteData) return;
+      if (!noteData) {
+        console.warn('No matching data point found for note date:', note.noteDate);
+        return;
+      }
       svg.append('circle')
         .attr('cx', x(noteData.date))
         .attr('cy', y(noteData.price))
@@ -74,24 +87,13 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
         });
     });
 
+    // Add click event on the svg to deselect note
     svg.on('click', () => setSelectedNote(null));
   }, [data, notes, selectedNote, setSelectedNote]);
 
   return (
     <div className="w-2/3 p-4">
-      <h1 className="text-2xl font-bold">Tesla Stock Chart</h1>
       <svg id="chart"></svg>
-      <button
-        className="mt-4 p-2 bg-blue-500 text-white rounded"
-        onClick={() => setIsModalOpen(true)}
-      >
-        Add Note
-      </button>
-      <AddNoteModal
-        isOpen={isModalOpen}
-        onRequestClose={() => setIsModalOpen(false)}
-        addNote={addNote}
-      />
     </div>
   );
 }
