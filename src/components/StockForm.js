@@ -3,14 +3,12 @@ import React, { useState } from 'react';
 const StockForm = ({ onCreate }) => {
   const [name, setName] = useState('');
   const [ticker, setTicker] = useState('');
-  const [price, setPrice] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    onCreate({ name, ticker, price: parseFloat(price) });
+    onCreate({ name, ticker });
     setName('');
     setTicker('');
-    setPrice('');
   };
 
   return (
@@ -28,13 +26,6 @@ const StockForm = ({ onCreate }) => {
           placeholder="Ticker"
           value={ticker}
           onChange={(e) => setTicker(e.target.value)}
-          className="py-2 px-4 border rounded mb-2"
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
           className="py-2 px-4 border rounded mb-2"
         />
         <button type="submit" className="py-2 px-4 bg-blue-500 text-white rounded">Add Stock</button>

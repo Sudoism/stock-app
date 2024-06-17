@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 const Stock = require('./models/stock')(sequelize, DataTypes);
 const Note = require('./models/note')(sequelize, DataTypes);
 
+//sequelize.sync({ force: true }) // to recreate table
 sequelize.sync()
   .then(() => {
    console.log('Database synced successfully.');
