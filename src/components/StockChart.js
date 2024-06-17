@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as d3 from 'd3';
 import AddNoteModal from './AddNoteModal';
 
-function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
+function StockChart({ ticker, notes, addNote, setSelectedNote, selectedNote }) {
   const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -12,7 +12,7 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
       try {
         const response = await axios.get('http://localhost:5001/api/yahoo-stock-data', {
           params: {
-            symbol: 'TSLA',
+            symbol: ticker,
             period1: Math.floor(new Date('2022-01-01').getTime() / 1000),
             period2: Math.floor(new Date().getTime() / 1000),
             interval: '1d'
@@ -31,7 +31,7 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
     };
 
     fetchStockData();
-  }, []);
+  }, [ticker]); // Re-fetch data when ticker changes
 
   useEffect(() => {
     if (data.length === 0) return;

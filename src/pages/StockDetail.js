@@ -69,9 +69,9 @@ const StockDetail = () => {
     <div className="container mx-auto p-4">
       {stock ? (
         <>
-          <h1 className="text-2xl font-bold mb-4">{stock.name} Stock Chart</h1>
+          <h1 className="text-2xl font-bold mb-4">{stock.name}</h1>
           <StockChart
-            stock={stock}
+            ticker={ticker} // Pass the ticker prop
             notes={notes}
             selectedNote={selectedNote}
             setSelectedNote={setSelectedNote}
