@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import * as d3 from 'd3';
 import AddNoteModal from './AddNoteModal';
 
@@ -7,17 +8,29 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    d3.csv('/tesla_stock_data_2_years.csv').then(data => {
-      data.forEach(d => {
-        const parsedDate = d3.timeParse("%Y-%m-%d")(d.date.split('T')[0]);
-        if (!parsedDate) {
-          console.error('Failed to parse data date:', d.date);
-        }
-        d.date = parsedDate;
-        d.price = +d.price;
-      });
-      setData(data);
-    });
+    const fetchStockData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/api/yahoo-stock-data', {
+          params: {
+            symbol: 'TSLA',
+            period1: Math.floor(new Date('2022-01-01').getTime() / 1000),
+            period2: Math.floor(new Date().getTime() / 1000),
+            interval: '1d'
+          }
+        });
+
+        const parsedData = d3.csvParse(response.data);
+        parsedData.forEach(d => {
+          d.date = d3.timeParse("%Y-%m-%d")(d.Date);
+          d.price = +d['Adj Close'];
+        });
+        setData(parsedData);
+      } catch (error) {
+        console.error('Error fetching stock data:', error);
+      }
+    };
+
+    fetchStockData();
   }, []);
 
   useEffect(() => {
@@ -64,7 +77,6 @@ function StockChart({ notes, addNote, setSelectedNote, selectedNote }) {
 
     // Add circles for notes
     notes.forEach(note => {
-      // Split the date string to get only the date part if it includes time
       const dateString = note.noteDate.split('T')[0];
       const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
       if (!noteDate) {

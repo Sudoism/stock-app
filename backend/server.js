@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
+const axios = require('axios');  // Import Axios
 const config = require('./config/config.json')[process.env.NODE_ENV || 'development'];
 
 const sequelize = new Sequelize(config.database, config.username, config.password, {
@@ -32,6 +33,27 @@ app.use('/api/notes', noteRoutes);
 
 app.get('/', (req, res) => {
   res.send('Stock App Backend');
+});
+
+// New route for fetching stock data from Yahoo Finance
+app.get('/api/yahoo-stock-data', async (req, res) => {
+  try {
+    const { symbol, period1, period2, interval } = req.query;
+    const response = await axios.get(`https://query1.finance.yahoo.com/v7/finance/download/${symbol}`, {
+      params: {
+        period1: period1,
+        period2: period2,
+        interval: interval,
+        events: 'history',
+        includeAdjustedClose: 'true'
+      }
+    });
+
+    res.send(response.data);
+  } catch (error) {
+    console.error('Error fetching stock data:', error);
+    res.status(500).send('Error fetching stock data');
+  }
 });
 
 app.listen(5001, () => {
