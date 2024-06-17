@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as d3 from 'd3';
-import AddNoteModal from './AddNoteModal';
 
-function StockChart({ ticker, notes, addNote, setSelectedNote, selectedNote }) {
+function StockChart({ ticker, notes, setSelectedNote, selectedNote }) {
   const [data, setData] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchStockData = async () => {
@@ -31,7 +29,7 @@ function StockChart({ ticker, notes, addNote, setSelectedNote, selectedNote }) {
     };
 
     fetchStockData();
-  }, [ticker]); // Re-fetch data when ticker changes
+  }, [ticker]);
 
   useEffect(() => {
     if (data.length === 0) return;
@@ -96,10 +94,11 @@ function StockChart({ ticker, notes, addNote, setSelectedNote, selectedNote }) {
         .on('click', (event) => {
           event.stopPropagation();
           setSelectedNote(note);
-        });
+        })
+        .append('title')
+        .text(note.content);
     });
 
-    // Add click event on the svg to deselect note
     svg.on('click', () => setSelectedNote(null));
   }, [data, notes, selectedNote, setSelectedNote]);
 

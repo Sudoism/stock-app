@@ -25,7 +25,7 @@ const AddNoteModal = ({ isOpen, onRequestClose, addNote }) => {
       className="flex items-center justify-center h-full"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
     >
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-auto"> {/* Increased max-width */}
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Add Note</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

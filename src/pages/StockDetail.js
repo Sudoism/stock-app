@@ -4,6 +4,8 @@ import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
 import StockChart from '../components/StockChart';
 import NotesPane from '../components/NotesPane';
 import AddNoteModal from '../components/AddNoteModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -67,34 +69,36 @@ const StockDetail = () => {
 
   return (
     <div className="container mx-auto p-4 flex flex-col items-center">
-      <Link to="/">
-        <button className="mb-4 p-2 bg-gray-500 text-white rounded">
-          Back to Overview
-        </button>
-      </Link>
+      <div className="flex items-center justify-between w-full max-w-4xl">
+        <Link to="/" className="text-gray-500 hover:text-gray-700">
+          <FontAwesomeIcon icon={faHome} size="lg" />
+        </Link>
+        <h1 className="text-2xl font-bold mx-auto">{stock ? stock.name : ''}</h1>
+      </div>
       {stock ? (
         <>
-          <h1 className="text-2xl font-bold mb-4">{stock.name}</h1>
           <div className="w-full max-w-4xl">
-            <StockChart
-              ticker={ticker}
-              notes={notes}
-              selectedNote={selectedNote}
-              setSelectedNote={setSelectedNote}
-            />
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="mt-4 p-2 bg-blue-500 text-white rounded"
-            >
-              Add Note
-            </button>
-          </div>
-          <div className="w-full max-w-4xl mt-4">
-            <NotesPane
-              selectedNote={selectedNote}
-              updateNote={updateExistingNote}
-              deleteNote={deleteExistingNote}
-            />
+            <div className="flex justify-between items-center">
+              <StockChart
+                ticker={ticker}
+                notes={notes}
+                selectedNote={selectedNote}
+                setSelectedNote={setSelectedNote}
+              />
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="ml-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Add Note
+              </button>
+            </div>
+            <div className="w-full mt-4">
+              <NotesPane
+                selectedNote={selectedNote}
+                updateNote={updateExistingNote}
+                deleteNote={deleteExistingNote}
+              />
+            </div>
           </div>
           <AddNoteModal
             isOpen={isModalOpen}

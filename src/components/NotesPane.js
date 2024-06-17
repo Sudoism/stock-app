@@ -1,4 +1,6 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 function NotesPane({ selectedNote, updateNote, deleteNote }) {
   const handleEditNote = () => {
@@ -10,28 +12,30 @@ function NotesPane({ selectedNote, updateNote, deleteNote }) {
 
   if (!selectedNote) {
     return (
-      <div className="w-1/3 p-4 bg-white">
+      <div className="w-full p-4 bg-white rounded-lg shadow-md mt-4">
         <h2 className="text-xl font-bold">Select a note to view details</h2>
       </div>
     );
   }
 
   return (
-    <div className="w-1/3 p-4 bg-white">
-      <h2 className="text-xl font-bold">{selectedNote.date}</h2>
-      <p>{selectedNote.content}</p>
-      <button
-        className="bg-yellow-500 text-white p-2 mt-2"
-        onClick={handleEditNote}
-      >
-        Edit
-      </button>
-      <button
-        className="bg-red-500 text-white p-2 mt-2"
-        onClick={() => deleteNote(selectedNote.id)}
-      >
-        Delete
-      </button>
+    <div className="w-full p-4 bg-white rounded-lg shadow-md mt-4 relative">
+      <h2 className="text-xl font-bold mb-2">{selectedNote.date}</h2>
+      <p className="mb-4">{selectedNote.content}</p>
+      <div className="absolute bottom-4 right-4 flex space-x-2">
+        <button
+          className="text-gray-500 hover:text-gray-700"
+          onClick={handleEditNote}
+        >
+          <FontAwesomeIcon icon={faPen} />
+        </button>
+        <button
+          className="text-gray-500 hover:text-gray-700"
+          onClick={() => deleteNote(selectedNote.id)}
+        >
+          <FontAwesomeIcon icon={faTrash} />
+        </button>
+      </div>
     </div>
   );
 }
