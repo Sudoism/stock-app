@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
 import StockChart from '../components/StockChart';
 import NotesPane from '../components/NotesPane';
@@ -66,27 +66,36 @@ const StockDetail = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 flex flex-col items-center">
+      <Link to="/">
+        <button className="mb-4 p-2 bg-gray-500 text-white rounded">
+          Back to Overview
+        </button>
+      </Link>
       {stock ? (
         <>
           <h1 className="text-2xl font-bold mb-4">{stock.name}</h1>
-          <StockChart
-            ticker={ticker} // Pass the ticker prop
-            notes={notes}
-            selectedNote={selectedNote}
-            setSelectedNote={setSelectedNote}
-          />
-          <NotesPane
-            selectedNote={selectedNote}
-            updateNote={updateExistingNote}
-            deleteNote={deleteExistingNote}
-          />
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="mt-4 p-2 bg-blue-500 text-white rounded"
-          >
-            Add Note
-          </button>
+          <div className="w-full max-w-4xl">
+            <StockChart
+              ticker={ticker}
+              notes={notes}
+              selectedNote={selectedNote}
+              setSelectedNote={setSelectedNote}
+            />
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="mt-4 p-2 bg-blue-500 text-white rounded"
+            >
+              Add Note
+            </button>
+          </div>
+          <div className="w-full max-w-4xl mt-4">
+            <NotesPane
+              selectedNote={selectedNote}
+              updateNote={updateExistingNote}
+              deleteNote={deleteExistingNote}
+            />
+          </div>
           <AddNoteModal
             isOpen={isModalOpen}
             onRequestClose={() => setIsModalOpen(false)}

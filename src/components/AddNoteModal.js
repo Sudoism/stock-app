@@ -1,4 +1,3 @@
-// AddNoteModal.js
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
@@ -26,7 +25,7 @@ const AddNoteModal = ({ isOpen, onRequestClose, addNote }) => {
       className="flex items-center justify-center h-full"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
     >
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-auto">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-auto"> {/* Increased max-width */}
         <h2 className="text-2xl font-bold mb-4">Add Note</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -46,6 +45,7 @@ const AddNoteModal = ({ isOpen, onRequestClose, addNote }) => {
               onChange={(e) => setContent(e.target.value)}
               required
               className="w-full border border-gray-300 rounded-md p-2"
+              rows="10"
             />
           </div>
           <div className="flex justify-end space-x-2">
