@@ -13,16 +13,18 @@ function NotesPane({ selectedNote, updateNote, deleteNote }) {
   if (!selectedNote) {
     return (
       <div className="w-full p-4 bg-white rounded-lg shadow-md mt-4">
-        <h2 className="text-xl font-bold">Select a note to view details</h2>
+        <h2 className="">Select a note to view details</h2>
       </div>
     );
   }
 
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-md mt-4 relative">
-      <h2 className="text-xl font-bold mb-2">{selectedNote.date}</h2>
-      <p className="mb-4">{selectedNote.content}</p>
-      <div className="absolute bottom-4 right-4 flex space-x-2">
+    <div className="w-full p-4 bg-white rounded-lg shadow-md mt-4 flex items-center justify-between">
+      <div>
+        <h2 className="text-xl font-bold mb-2">{selectedNote.date}</h2>
+        <p className="mb-4">{selectedNote.content}</p>
+      </div>
+      <div className="flex space-x-2 items-center">
         <button
           className="text-gray-500 hover:text-gray-700"
           onClick={handleEditNote}

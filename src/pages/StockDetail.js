@@ -78,31 +78,34 @@ const StockDetail = () => {
       </div>
       {stock ? (
         <>
-          <div className="w-full max-w-4xl flex flex-col lg:flex-row">
-            <div className="w-full lg:w-2/3">
-              <div className="flex justify-between items-center mb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-4xl">
+            <div className="lg:col-span-3">
+              <div className="mb-2">
                 <StockChart
                   ticker={ticker}
                   notes={notes}
                   selectedNote={selectedNote}
                   setSelectedNote={setSelectedNote}
                 />
+              </div>
+              <div className="flex items-center justify-between mb-2 space-x-4">
+                
+                <div className="flex-grow">
+                  <NotesPane
+                    selectedNote={selectedNote}
+                    updateNote={updateExistingNote}
+                    deleteNote={deleteExistingNote}
+                  />
+                </div>
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="ml-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                   Add Note
                 </button>
               </div>
-              <div className="w-full">
-                <NotesPane
-                  selectedNote={selectedNote}
-                  updateNote={updateExistingNote}
-                  deleteNote={deleteExistingNote}
-                />
-              </div>
             </div>
-            <div className="w-full lg:w-1/3 lg:ml-4 mt-4 lg:mt-0">
+            <div className="lg:col-span-3">
               <StockInfo ticker={ticker} />
             </div>
           </div>
