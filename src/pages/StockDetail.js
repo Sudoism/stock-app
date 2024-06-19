@@ -4,6 +4,7 @@ import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
 import StockChart from '../components/StockChart';
 import NotesPane from '../components/NotesPane';
 import AddNoteModal from '../components/AddNoteModal';
+import StockInfo from '../components/StockInfo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 
@@ -68,8 +69,8 @@ const StockDetail = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 flex flex-col items-center">
-      <div className="flex items-center justify-between w-full max-w-4xl">
+    <div className="container mx-auto p-4">
+      <div className="flex items-center justify-between w-full max-w-4xl mb-4">
         <Link to="/" className="text-gray-500 hover:text-gray-700">
           <FontAwesomeIcon icon={faHome} size="lg" />
         </Link>
@@ -77,27 +78,32 @@ const StockDetail = () => {
       </div>
       {stock ? (
         <>
-          <div className="w-full max-w-4xl">
-            <div className="flex justify-between items-center">
-              <StockChart
-                ticker={ticker}
-                notes={notes}
-                selectedNote={selectedNote}
-                setSelectedNote={setSelectedNote}
-              />
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="ml-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Add Note
-              </button>
+          <div className="w-full max-w-4xl flex flex-col lg:flex-row">
+            <div className="w-full lg:w-2/3">
+              <div className="flex justify-between items-center mb-4">
+                <StockChart
+                  ticker={ticker}
+                  notes={notes}
+                  selectedNote={selectedNote}
+                  setSelectedNote={setSelectedNote}
+                />
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="ml-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Add Note
+                </button>
+              </div>
+              <div className="w-full">
+                <NotesPane
+                  selectedNote={selectedNote}
+                  updateNote={updateExistingNote}
+                  deleteNote={deleteExistingNote}
+                />
+              </div>
             </div>
-            <div className="w-full mt-4">
-              <NotesPane
-                selectedNote={selectedNote}
-                updateNote={updateExistingNote}
-                deleteNote={deleteExistingNote}
-              />
+            <div className="w-full lg:w-1/3 lg:ml-4 mt-4 lg:mt-0">
+              <StockInfo ticker={ticker} />
             </div>
           </div>
           <AddNoteModal
