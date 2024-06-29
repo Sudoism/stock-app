@@ -29,6 +29,14 @@ const StockInfo = ({ ticker }) => {
       <div className="card-body">
         <h2 className="card-title">{ticker} Stock Information</h2>
         <div className="space-y-2">
+          <p><strong>Sector:</strong> {info.sector}</p>
+          <p><strong>Industry:</strong> {info.industry}</p>
+          <p><strong>Country:</strong> {info.country}</p>
+          <p><strong>IPO Date:</strong> {info.ipoDate}</p>
+          <p><strong>Exchange:</strong> {info.exchangeShortName}</p>
+          <p><strong>Market Cap:</strong> {info.mktCap}</p>
+          <p><strong>CEO:</strong> {info.ceo}</p>
+          <p><strong>Employees:</strong> {info.fullTimeEmployees.toLocaleString()}</p>
           <p>
             <strong>Description: </strong>
             {isExpanded ? info.description : `${info.description.substring(0, 100)}...`}
@@ -39,9 +47,6 @@ const StockInfo = ({ ticker }) => {
               {isExpanded ? 'Show less' : 'Show more'}
             </button>
           </p>
-          <p><strong>Industry:</strong> {info.industry}</p>
-          <p><strong>Sector:</strong> {info.sector}</p>
-          <p><strong>Employees:</strong> {info.fullTimeEmployees.toLocaleString()}</p>
         </div>
       </div>
     </div>
