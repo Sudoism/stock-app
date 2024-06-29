@@ -12,31 +12,39 @@ function NotesPane({ selectedNote, updateNote, deleteNote }) {
 
   if (!selectedNote) {
     return (
-      <div className="w-full p-4 bg-white rounded-lg shadow-md mt-4">
-        <h2 className="">Select a note to view details</h2>
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h2 className="card-title">Select a note to view details</h2>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-md mt-4 flex items-center justify-between">
-      <div>
-        <h2 className="text-xl font-bold mb-2">{selectedNote.date}</h2>
-        <p className="mb-4">{selectedNote.content}</p>
-      </div>
-      <div className="flex space-x-2 items-center">
-        <button
-          className="text-gray-500 hover:text-gray-700"
-          onClick={handleEditNote}
-        >
-          <FontAwesomeIcon icon={faPen} />
-        </button>
-        <button
-          className="text-gray-500 hover:text-gray-700"
-          onClick={() => deleteNote(selectedNote.id)}
-        >
-          <FontAwesomeIcon icon={faTrash} />
-        </button>
+    <div className="card bg-base-100 shadow-xl">
+      <div className="card-body">
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="card-title mb-2">{selectedNote.date}</h2>
+            <p className="text-sm">{selectedNote.content}</p>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              className="btn btn-sm btn-ghost"
+              onClick={handleEditNote}
+              aria-label="Edit note"
+            >
+              <FontAwesomeIcon icon={faPen} />
+            </button>
+            <button
+              className="btn btn-sm btn-ghost text-error"
+              onClick={() => deleteNote(selectedNote.id)}
+              aria-label="Delete note"
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

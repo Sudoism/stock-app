@@ -21,39 +21,38 @@ const StockInfo = ({ ticker }) => {
   }, [ticker]);
 
   if (!info) {
-    return <div>Loading stock information...</div>;
+    return <div className="loading loading-spinner loading-lg"></div>;
   }
 
   return (
-    <div className="stock-info p-4 bg-white rounded shadow-md">
-      <h2 className="text-xl font-bold mb-2">{ticker} Stock Information</h2>
-      <p>
-        <strong>Description:</strong>
-        {isExpanded ? (
-          info.description
-        ) : (
-          <>
-            {info.description.substring(0, 100)}...
-            <button
-              onClick={() => setIsExpanded(true)}
-              className="text-blue-500 ml-2"
-            >
-              Show more
-            </button>
-          </>
-        )}
-        {isExpanded && (
+    <div className="stock-info">
+      <h2 className="text-2xl font-bold mb-4">{ticker} Stock Information</h2>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold mb-2">Description</h3>
+        <p className="text-sm">
+          {isExpanded ? info.description : `${info.description.substring(0, 100)}...`}
           <button
-            onClick={() => setIsExpanded(false)}
-            className="text-blue-500 ml-2"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="btn btn-link btn-xs ml-2"
           >
-            Show less
+            {isExpanded ? 'Show less' : 'Show more'}
           </button>
-        )}
-      </p>
-      <p><strong>Industry:</strong> {info.industry}</p>
-      <p><strong>Sector:</strong> {info.sector}</p>
-      <p><strong>Employees:</strong> {info.fullTimeEmployees}</p>
+        </p>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Industry</h3>
+          <p className="text-sm">{info.industry}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Sector</h3>
+          <p className="text-sm">{info.sector}</p>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Employees</h3>
+          <p className="text-sm">{info.fullTimeEmployees.toLocaleString()}</p>
+        </div>
+      </div>
     </div>
   );
 };
