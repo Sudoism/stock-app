@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import * as d3 from 'd3';
 
 function StockChart({ ticker, notes, setSelectedNote, selectedNote }) {
   const [data, setData] = useState([]);
+  const svgRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const fetchStockData = async () => {
@@ -34,77 +36,94 @@ function StockChart({ ticker, notes, setSelectedNote, selectedNote }) {
   useEffect(() => {
     if (data.length === 0) return;
 
-    const svg = d3.select('#chart')
-      .attr('width', 800)
-      .attr('height', 400);
+    const drawChart = () => {
+      const container = containerRef.current;
+      const svg = d3.select(svgRef.current);
+      svg.selectAll('*').remove();
 
-    svg.selectAll('*').remove();
+      // Set the aspect ratio
+      const aspectRatio = 16 / 9;
+      const containerWidth = container.clientWidth;
+      const containerHeight = containerWidth / aspectRatio;
 
-    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
-    const width = +svg.attr('width') - margin.left - margin.right;
-    const height = +svg.attr('height') - margin.top - margin.bottom;
+      // Set the SVG size
+      svg.attr('width', containerWidth)
+         .attr('height', containerHeight);
 
-    const x = d3.scaleTime()
-      .domain(d3.extent(data, d => d.date))
-      .range([margin.left, width - margin.right]);
+      const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+      const width = containerWidth - margin.left - margin.right;
+      const height = containerHeight - margin.top - margin.bottom;
 
-    const y = d3.scaleLinear()
-      .domain([d3.min(data, d => d.price) - 50, d3.max(data, d => d.price) + 50])
-      .nice()
-      .range([height - margin.bottom, margin.top]);
+      const x = d3.scaleTime()
+        .domain(d3.extent(data, d => d.date))
+        .range([margin.left, width - margin.right]);
 
-    const line = d3.line()
-      .defined(d => !isNaN(d.price))
-      .x(d => x(d.date))
-      .y(d => y(d.price));
+      const y = d3.scaleLinear()
+        .domain([d3.min(data, d => d.price) - 50, d3.max(data, d => d.price) + 50])
+        .nice()
+        .range([height - margin.bottom, margin.top]);
 
-    svg.append('g')
-      .attr('transform', `translate(0,${height - margin.bottom})`)
-      .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0));
+      const line = d3.line()
+        .defined(d => !isNaN(d.price))
+        .x(d => x(d.date))
+        .y(d => y(d.price));
 
-    svg.append('g')
-      .attr('transform', `translate(${margin.left},0)`)
-      .call(d3.axisLeft(y));
+      svg.append('g')
+        .attr('transform', `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0));
 
-    svg.append('path')
-      .datum(data)
-      .attr('fill', 'none')
-      .attr('stroke', 'steelblue')
-      .attr('stroke-width', 1.5)
-      .attr('d', line);
+      svg.append('g')
+        .attr('transform', `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y));
 
-    // Add circles for notes
-    notes.forEach(note => {
-      const dateString = note.noteDate.split('T')[0];
-      const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
-      if (!noteDate) {
-        console.error('Failed to parse note date:', note.noteDate);
-        return;
-      }
-      const noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
-      if (!noteData) {
-        console.warn('No matching data point found for note date:', note.noteDate);
-        return;
-      }
-      svg.append('circle')
-        .attr('cx', x(noteData.date))
-        .attr('cy', y(noteData.price))
-        .attr('r', 5)
-        .attr('fill', selectedNote && selectedNote.id === note.id ? 'red' : 'blue')
-        .on('click', (event) => {
-          event.stopPropagation();
-          setSelectedNote(note);
-        })
-        .append('title')
-        .text(note.content);
+      svg.append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', 'steelblue')
+        .attr('stroke-width', 1.5)
+        .attr('d', line);
+
+      // Add circles for notes
+      notes.forEach(note => {
+        const dateString = note.noteDate.split('T')[0];
+        const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
+        if (!noteDate) {
+          console.error('Failed to parse note date:', note.noteDate);
+          return;
+        }
+        const noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
+        if (!noteData) {
+          console.warn('No matching data point found for note date:', note.noteDate);
+          return;
+        }
+        svg.append('circle')
+          .attr('cx', x(noteData.date))
+          .attr('cy', y(noteData.price))
+          .attr('r', 5)
+          .attr('fill', selectedNote && selectedNote.id === note.id ? 'red' : 'blue')
+          .on('click', (event) => {
+            event.stopPropagation();
+            setSelectedNote(note);
+          })
+          .append('title')
+          .text(note.content);
+      });
+    };
+
+    drawChart();
+
+    const resizeObserver = new ResizeObserver(() => {
+      drawChart();
     });
 
-    svg.on('click', () => setSelectedNote(null));
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
   }, [data, notes, selectedNote, setSelectedNote]);
 
   return (
-    <div className="w-2/3 p-4">
-      <svg id="chart"></svg>
+    <div className="w-full" ref={containerRef} onClick={() => setSelectedNote(null)}>
+      <svg ref={svgRef} style={{ width: '100%', height: 'auto' }}></svg>
     </div>
   );
 }
