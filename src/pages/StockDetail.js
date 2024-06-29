@@ -4,6 +4,7 @@ import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
 import StockChart from '../components/StockChart';
 import StockInfo from '../components/StockInfo';
 import NoteDetail from '../components/NoteDetail';
+import FinancialHealth from '../components/FinancialHealth';
 import Header from '../components/Header';
 import AddNoteModal from '../components/AddNoteModal';
 
@@ -92,6 +93,9 @@ const StockDetail = () => {
                   Add Note
                 </button>
               </div>
+            </div>
+            <div className="lg:col-span-3">
+              <FinancialHealth ticker={ticker} />
             </div>
           </div>
         ) : (

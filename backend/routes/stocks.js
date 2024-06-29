@@ -1,28 +1,39 @@
 const express = require('express');
 const router = express.Router();
-const { Stock } = require('../models');
+const stockService = require('../services/stockService');
 
 // Get all stocks
 router.get('/', async (req, res) => {
-  const stocks = await Stock.findAll();
-  res.json(stocks);
+  try {
+    const stocks = await stockService.getAllStocks();
+    res.json(stocks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Get a specific stock by ticker
 router.get('/:ticker', async (req, res) => {
-    console.log(`Fetching stock with ticker: ${req.params.ticker}`); // Ensure this logs correctly
-    const stock = await Stock.findOne({ where: { ticker: req.params.ticker } });
+  try {
+    const stock = await stockService.getStockByTicker(req.params.ticker);
     if (stock) {
       res.json(stock);
     } else {
       res.status(404).json({ error: 'Stock not found' });
     }
-  });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Create a new stock
 router.post('/', async (req, res) => {
-  const stock = await Stock.create(req.body);
-  res.json(stock);
+  try {
+    const stock = await stockService.createStock(req.body);
+    res.status(201).json(stock);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = router;

@@ -1,18 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const { Note, Stock } = require('../models');
+const noteService = require('../services/noteService');
 
 // Get notes for a specific stock by ticker
 router.get('/:ticker', async (req, res) => {
-  const stock = await Stock.findOne({ where: { ticker: req.params.ticker } });
-  if (stock) {
-    const notes = await Note.findAll({ where: { stockId: stock.id } });
-    res.json(notes);
-  } else {
-    res.status(404).json({ error: 'Stock not found' });
+  try {
+    const notes = await noteService.getNotesByTicker(req.params.ticker);
+    if (notes) {
+      res.json(notes);
+    } else {
+      res.status(404).json({ error: 'Stock not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
+// Create a new note
 router.post('/', async (req, res) => {
   try {
     const { stockId, content, noteDate } = req.body;
@@ -20,35 +24,36 @@ router.post('/', async (req, res) => {
       res.status(400).send({ error: 'Content must be a string.' });
       return;
     }
-    const note = await Note.create({ stockId, content, noteDate });
+    const note = await noteService.createNote({ stockId, content, noteDate });
     res.status(201).json(note);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+// Update an existing note
 router.put('/:id', async (req, res) => {
   try {
-    const note = await Note.findByPk(req.params.id);
-    if (!note) {
-      return res.status(404).json({ error: 'Note not found' });
+    const updatedNote = await noteService.updateNote(req.params.id, req.body);
+    if (updatedNote) {
+      res.json(updatedNote);
+    } else {
+      res.status(404).json({ error: 'Note not found' });
     }
-    const { content, noteDate } = req.body;
-    const updatedNote = await note.update({ content, noteDate });
-    res.status(200).json(updatedNote);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+// Delete a note
 router.delete('/:id', async (req, res) => {
   try {
-    const note = await Note.findByPk(req.params.id);
-    if (!note) {
-      return res.status(404).json({ error: 'Note not found' });
+    const result = await noteService.deleteNote(req.params.id);
+    if (result) {
+      res.status(204).end();
+    } else {
+      res.status(404).json({ error: 'Note not found' });
     }
-    await note.destroy();
-    res.status(204).end();
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
