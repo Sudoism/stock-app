@@ -25,32 +25,23 @@ const StockInfo = ({ ticker }) => {
   }
 
   return (
-    <div className="stock-info">
-      <h2 className="text-2xl font-bold mb-4">{ticker} Stock Information</h2>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-2">Description</h3>
-        <p className="text-sm">
-          {isExpanded ? info.description : `${info.description.substring(0, 100)}...`}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="btn btn-link btn-xs ml-2"
-          >
-            {isExpanded ? 'Show less' : 'Show more'}
-          </button>
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Industry</h3>
-          <p className="text-sm">{info.industry}</p>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Sector</h3>
-          <p className="text-sm">{info.sector}</p>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Employees</h3>
-          <p className="text-sm">{info.fullTimeEmployees.toLocaleString()}</p>
+    <div className="card bg-base-100 shadow-xl">
+      <div className="card-body">
+        <h2 className="card-title">{ticker} Stock Information</h2>
+        <div className="space-y-2">
+          <p>
+            <strong>Description: </strong>
+            {isExpanded ? info.description : `${info.description.substring(0, 100)}...`}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="btn btn-link btn-xs ml-2"
+            >
+              {isExpanded ? 'Show less' : 'Show more'}
+            </button>
+          </p>
+          <p><strong>Industry:</strong> {info.industry}</p>
+          <p><strong>Sector:</strong> {info.sector}</p>
+          <p><strong>Employees:</strong> {info.fullTimeEmployees.toLocaleString()}</p>
         </div>
       </div>
     </div>

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
 import StockChart from '../components/StockChart';
-import NotesPane from '../components/NotesPane';
-import AddNoteModal from '../components/AddNoteModal';
 import StockInfo from '../components/StockInfo';
+import NoteDetail from '../components/NoteDetail';
 import Header from '../components/Header';
+import AddNoteModal from '../components/AddNoteModal';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -44,6 +44,7 @@ const StockDetail = () => {
     try {
       await updateNote(note);
       setNotes(notes.map((n) => (n.id === note.id ? note : n)));
+      setSelectedNote(note);
     } catch (error) {
       console.error('Failed to update note:', error);
     }
@@ -53,6 +54,7 @@ const StockDetail = () => {
     try {
       await deleteNote(id);
       setNotes(notes.filter((note) => note.id !== id));
+      setSelectedNote(null);
     } catch (error) {
       console.error('Failed to delete note:', error);
     }
@@ -65,42 +67,30 @@ const StockDetail = () => {
         {stock ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <StockChart
-                    ticker={ticker}
-                    notes={notes}
-                    selectedNote={selectedNote}
-                    setSelectedNote={setSelectedNote}
-                  />
-                </div>
-              </div>
+              <StockChart
+                ticker={ticker}
+                notes={notes}
+                selectedNote={selectedNote}
+                setSelectedNote={setSelectedNote}
+              />
             </div>
             <div className="lg:col-span-1">
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <StockInfo ticker={ticker} />
-                </div>
-              </div>
-            </div>
-            <div className="lg:col-span-3">
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="card-title">Notes</h2>
-                    <button
-                      onClick={() => setIsModalOpen(true)}
-                      className="btn btn-primary"
-                    >
-                      Add Note
-                    </button>
-                  </div>
-                  <NotesPane
-                    selectedNote={selectedNote}
-                    updateNote={updateExistingNote}
-                    deleteNote={deleteExistingNote}
-                  />
-                </div>
+              <StockInfo ticker={ticker} />
+              {selectedNote && (
+                <NoteDetail
+                  note={selectedNote}
+                  updateNote={updateExistingNote}
+                  deleteNote={deleteExistingNote}
+                  onClose={() => setSelectedNote(null)}
+                />
+              )}
+              <div className="mt-4">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="btn btn-primary btn-block"
+                >
+                  Add Note
+                </button>
               </div>
             </div>
           </div>

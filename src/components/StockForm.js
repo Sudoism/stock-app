@@ -1,34 +1,62 @@
 import React, { useState } from 'react';
 
-const StockForm = ({ onCreate }) => {
+const StockForm = ({ onCreate, onCancel }) => {
   const [name, setName] = useState('');
   const [ticker, setTicker] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    onCreate({ name, ticker });
-    setName('');
-    setTicker('');
+    setError('');
+
+    if (!name.trim() || !ticker.trim()) {
+      setError('Both name and ticker are required.');
+      return;
+    }
+
+    try {
+      await onCreate({ name, ticker });
+      setName('');
+      setTicker('');
+    } catch (err) {
+      setError('Failed to add stock. Please try again.');
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4">
-      <div className="flex flex-col mb-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && <div className="alert alert-error">{error}</div>}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text">Stock Name</span>
+        </label>
         <input
           type="text"
-          placeholder="Name"
+          placeholder="e.g. Apple Inc."
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="py-2 px-4 border rounded mb-2"
+          className="input input-bordered w-full"
         />
+      </div>
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text">Stock Ticker</span>
+        </label>
         <input
           type="text"
-          placeholder="Ticker"
+          placeholder="e.g. AAPL"
           value={ticker}
           onChange={(e) => setTicker(e.target.value)}
-          className="py-2 px-4 border rounded mb-2"
+          className="input input-bordered w-full"
         />
-        <button type="submit" className="py-2 px-4 bg-blue-500 text-white rounded">Add Stock</button>
+      </div>
+      <div className="flex justify-end space-x-2">
+        <button type="button" onClick={onCancel} className="btn btn-ghost">
+          Cancel
+        </button>
+        <button type="submit" className="btn btn-primary">
+          Add Stock
+        </button>
       </div>
     </form>
   );

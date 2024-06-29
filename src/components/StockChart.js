@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import * as d3 from 'd3';
 
-function StockChart({ ticker, notes, setSelectedNote, selectedNote }) {
+function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
   const [data, setData] = useState([]);
   const svgRef = useRef(null);
   const containerRef = useRef(null);
@@ -41,12 +41,10 @@ function StockChart({ ticker, notes, setSelectedNote, selectedNote }) {
       const svg = d3.select(svgRef.current);
       svg.selectAll('*').remove();
 
-      // Set the aspect ratio
       const aspectRatio = 16 / 9;
       const containerWidth = container.clientWidth;
       const containerHeight = containerWidth / aspectRatio;
 
-      // Set the SVG size
       svg.attr('width', containerWidth)
          .attr('height', containerHeight);
 
@@ -83,7 +81,6 @@ function StockChart({ ticker, notes, setSelectedNote, selectedNote }) {
         .attr('stroke-width', 1.5)
         .attr('d', line);
 
-      // Add circles for notes
       notes.forEach(note => {
         const dateString = note.noteDate.split('T')[0];
         const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
@@ -122,8 +119,13 @@ function StockChart({ ticker, notes, setSelectedNote, selectedNote }) {
   }, [data, notes, selectedNote, setSelectedNote]);
 
   return (
-    <div className="w-full" ref={containerRef} onClick={() => setSelectedNote(null)}>
-      <svg ref={svgRef} style={{ width: '100%', height: 'auto' }}></svg>
+    <div className="card bg-base-100 shadow-xl">
+      <div className="card-body">
+        <h2 className="card-title">{ticker} Stock Chart</h2>
+        <div className="w-full" ref={containerRef} onClick={() => setSelectedNote(null)}>
+          <svg ref={svgRef} style={{ width: '100%', height: 'auto' }}></svg>
+        </div>
+      </div>
     </div>
   );
 }
