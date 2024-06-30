@@ -14,7 +14,7 @@ const FinancialHealth = ({ ticker }) => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching financial data:', err);
-        setError('Failed to fetch financial data');
+        setError('Financial data not available for this stock.');
         setLoading(false);
       }
     };
@@ -22,9 +22,25 @@ const FinancialHealth = ({ ticker }) => {
     fetchFinancialData();
   }, [ticker]);
 
-  if (loading) return <div className="loading loading-spinner loading-lg"></div>;
-  if (error) return <div className="alert alert-error">{error}</div>;
-  if (financialData.length === 0) return <div className="alert alert-info">No financial data available</div>;
+  if (loading) {
+    return (
+      <div className="card bg-base-100 shadow-xl p-4">
+        <div className="flex items-center justify-center h-64">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || financialData.length === 0) {
+    return (
+      <div className="card bg-base-100 shadow-xl p-4">
+        <div className="flex items-center justify-center h-64 text-gray-500">
+          <p>{error || 'No financial data available for this stock.'}</p>
+        </div>
+      </div>
+    );
+  }
 
   const formatNumber = (num) => {
     if (num === undefined || isNaN(num)) return 'N/A';
@@ -51,18 +67,18 @@ const FinancialHealth = ({ ticker }) => {
       section: "Income Statement",
       metrics: [
         { label: 'Revenue', key: 'revenuefromcontractwithcustomerexcludingassessedtax' },
-        { label: 'Cost of Goods Sold (COGS)', key: 'costofgoodsandservicessold' },
+        { label: 'Cost of Goods Sold', key: 'costofgoodsandservicessold' },
         { label: 'Gross Profit', key: 'grossprofit' },
         { label: 'Operating Expenses', key: 'operatingexpenses' },
-        { label: 'Net Profit', key: 'netincomeloss' },
+        { label: 'Net Income', key: 'netincomeloss' },
       ]
     },
     {
       section: "Balance Sheet",
       metrics: [
-        { label: 'Short-Term Assets', key: 'assetscurrent' },
+        { label: 'Current Assets', key: 'assetscurrent' },
         { label: 'Long-Term Assets', key: 'longTermAssets', calculate: calculateLongTermAssets },
-        { label: 'Short-Term Liabilities', key: 'liabilitiescurrent' },
+        { label: 'Current Liabilities', key: 'liabilitiescurrent' },
         { label: 'Long-Term Liabilities', key: 'longTermLiabilities', calculate: calculateLongTermLiabilities },
       ]
     },
@@ -80,7 +96,7 @@ const FinancialHealth = ({ ticker }) => {
   return (
     <div className="card bg-base-100 shadow-xl overflow-x-auto">
       <div className="card-body">
-        <h2 className="card-title">Financial Health (Last 5 Years)</h2>
+        <h2 className="card-title">Financial Health</h2>
         <table className="table w-full">
           <thead>
             <tr>
