@@ -96,8 +96,8 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
 
         const isSelected = selectedNote && selectedNote.id === note.id;
         let fillColor = 'gray';  // Default color for notes without transactions
-        if (note.transactionType === 'buy') fillColor = 'green';
-        if (note.transactionType === 'sell') fillColor = 'red';
+        if (note.transactionType === 'buy') fillColor = 'rgb(34, 197, 94)';  // green-500
+        if (note.transactionType === 'sell') fillColor = 'rgb(239, 68, 68)';  // red-500
 
         const group = svg.append('g')
           .attr('transform', `translate(${x(noteData.date)},${y(noteData.price)})`)
