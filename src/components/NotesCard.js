@@ -13,59 +13,91 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
     return date.toISOString().split('T')[0];
   };
 
-  const handleEditNote = (updatedNote) => {
-    updateNote(updatedNote);
-    setIsEditModalOpen(false);
+  const sortedNotes = [...notes].sort((a, b) => new Date(b.noteDate) - new Date(a.noteDate));
+
+  const renderTransactionBadge = (note) => {
+    if (!note.transactionType) return null;
+    const color = note.transactionType === 'buy' ? 'bg-green-500' : 'bg-red-500';
+    return (
+      <div className={`badge ${color} text-white text-xs ml-2 flex-shrink-0`}>
+        {note.transactionType === 'buy' ? '+' : '-'}{note.quantity}
+      </div>
+    );
   };
 
-  const handleDeleteClick = () => {
-    setIsDeleteModalOpen(true);
-  };
+  const renderNoteDetails = () => {
+    if (!selectedNote) return null;
 
-  const handleConfirmDelete = () => {
-    if (selectedNote) {
-      deleteNote(selectedNote.id);
-      setIsDeleteModalOpen(false);
-      setSelectedNote(null);
-    }
+    return (
+      <div className="p-2 bg-base-100 rounded">
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-sm text-gray-600">{formatDate(selectedNote.noteDate)}</p>
+          {renderTransactionBadge(selectedNote)}
+        </div>
+        <p className="text-sm mb-4">{selectedNote.content}</p>
+        {selectedNote.transactionType && (
+          <div className="mb-4 text-sm">
+            <p>
+              {selectedNote.transactionType === 'buy' ? 'Bought' : 'Sold'}:{' '}
+              <strong>${(selectedNote.price * selectedNote.quantity).toFixed(2)}</strong>
+            </p>
+            <p>
+              Quantity: <strong>{selectedNote.quantity}</strong>
+            </p>
+            <p>
+              Quote: <strong>${parseFloat(selectedNote.price).toFixed(2)}</strong>
+            </p>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="card bg-base-100 shadow-xl h-full">
-      <div className="card-body p-0 flex flex-col h-full">
-        <div className="flex-grow overflow-auto">
-          {selectedNote ? (
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Note Details</h3>
-                <button className="btn btn-sm btn-ghost" onClick={() => setSelectedNote(null)} aria-label="Close">
-                  <FontAwesomeIcon icon={faTimes} />
-                </button>
-              </div>
-              <p className="text-sm text-gray-600 mb-2">{formatDate(selectedNote.noteDate)}</p>
-              <p className="text-base mb-4">{selectedNote.content}</p>
-              {selectedNote.transactionType && (
-                <div className="mb-4">
-                  <h4 className="text-md font-semibold mb-2">Transaction Details</h4>
-                  <p>Type: {selectedNote.transactionType}</p>
-                  <p>Price: ${selectedNote.price}</p>
-                  <p>Quantity: {selectedNote.quantity}</p>
-                </div>
-              )}
-              <div className="flex justify-end space-x-2">
-                <button className="btn btn-sm btn-ghost" onClick={() => setIsEditModalOpen(true)} aria-label="Edit">
-                  <FontAwesomeIcon icon={faPen} />
-                </button>
-                <button className="btn btn-sm btn-ghost text-error" onClick={handleDeleteClick} aria-label="Delete">
-                  <FontAwesomeIcon icon={faTrash} />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <p className="p-4 text-center text-gray-500">Select a note to view details</p>
+      <div className="card-body p-4 flex flex-col h-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="card-title">Notes</h2>
+          {selectedNote && (
+            <button 
+              className="p-0 h-6 w-6 flex items-center justify-center hover:bg-base-200 rounded-full transition-colors duration-200" 
+              onClick={() => setSelectedNote(null)} 
+              aria-label="Close"
+            >
+              <FontAwesomeIcon icon={faTimes} className="text-sm" />
+            </button>
           )}
         </div>
-        <div className="p-4">
+        <div className="flex-grow overflow-auto">
+          {selectedNote ? (
+            renderNoteDetails()
+          ) : (
+            <ul className="space-y-2">
+              {sortedNotes.map((note) => (
+                <li key={note.id} className="cursor-pointer hover:bg-base-200 rounded" onClick={() => setSelectedNote(note)}>
+                  <div className="p-2 flex items-start">
+                    <div className="flex-grow mr-2 min-w-0">
+                      <p className="text-sm text-gray-600">{formatDate(note.noteDate)}</p>
+                      <p className="text-sm truncate">{note.content}</p>
+                    </div>
+                    {renderTransactionBadge(note)}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {selectedNote && (
+          <div className="flex justify-end space-x-2 mt-4">
+            <button className="btn btn-sm btn-ghost" onClick={() => setIsEditModalOpen(true)} aria-label="Edit">
+              <FontAwesomeIcon icon={faPen} />
+            </button>
+            <button className="btn btn-sm btn-ghost text-error" onClick={() => setIsDeleteModalOpen(true)} aria-label="Delete">
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+          </div>
+        )}
+        <div className="mt-4">
           <button
             onClick={openAddNoteModal}
             className="btn btn-primary btn-block"
@@ -74,18 +106,26 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
           </button>
         </div>
       </div>
-      {selectedNote && (
-        <EditNoteModal
-          isOpen={isEditModalOpen}
-          onRequestClose={() => setIsEditModalOpen(false)}
-          note={selectedNote}
-          updateNote={handleEditNote}
-        />
-      )}
+      <EditNoteModal
+        isOpen={isEditModalOpen}
+        onRequestClose={() => setIsEditModalOpen(false)}
+        note={selectedNote}
+        updateNote={(updatedNote) => {
+          updateNote(updatedNote);
+          setSelectedNote(updatedNote);
+          setIsEditModalOpen(false);
+        }}
+      />
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onRequestClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleConfirmDelete}
+        onConfirm={() => {
+          if (selectedNote) {
+            deleteNote(selectedNote.id);
+            setIsDeleteModalOpen(false);
+            setSelectedNote(null);
+          }
+        }}
       />
     </div>
   );

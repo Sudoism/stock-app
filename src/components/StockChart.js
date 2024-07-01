@@ -104,11 +104,12 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
           .on('click', (event) => {
             event.stopPropagation();
             setSelectedNote(note);
-          });
+          })
+          .style('cursor', 'pointer');
 
         // Circle
         group.append('circle')
-          .attr('r', isSelected ? 18 : 10)  // Larger radius for selected notes
+          .attr('r', isSelected ? 18 : 10)
           .attr('fill', fillColor)
           .attr('stroke', isSelected ? 'white' : 'none')
           .attr('stroke-width', isSelected ? 2 : 0);
@@ -119,12 +120,30 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
             .attr('text-anchor', 'middle')
             .attr('dy', '.3em')
             .attr('fill', 'white')
-            .style('font-size', isSelected ? '14px' : '10px')  // Larger font for selected notes
+            .style('font-size', isSelected ? '18px' : '10px')
+            .style('pointer-events', 'none')
             .text(note.quantity);
         }
 
+        // Tooltip
+        let tooltipContent = `Note: ${note.content}`;
+        if (note.transactionType) {
+          const price = parseFloat(note.price);
+          const quantity = parseInt(note.quantity);
+          if (!isNaN(price) && !isNaN(quantity)) {
+            const totalValue = price * quantity;
+            tooltipContent += `\n${note.transactionType === 'buy' ? 'Bought' : 'Sold'}: $${totalValue.toFixed(2)}`;
+            tooltipContent += `\nQuantity: ${quantity}`;
+            tooltipContent += `\nQuote: $${price.toFixed(2)}`;
+          } else {
+            tooltipContent += `\n${note.transactionType === 'buy' ? 'Bought' : 'Sold'}`;
+            tooltipContent += `\nQuantity: ${note.quantity}`;
+            tooltipContent += `\nQuote: $${note.price}`;
+          }
+        }
+
         group.append('title')
-          .text(note.content);
+          .text(tooltipContent);
       });
     };
 
