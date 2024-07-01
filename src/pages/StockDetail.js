@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom';
 import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
 import StockChart from '../components/StockChart';
 import StockInfo from '../components/StockInfo';
-import NotesPanel from '../components/NotesPanel';
 import FinancialHealth from '../components/FinancialHealth';
 import Header from '../components/Header';
 import AddNoteModal from '../components/AddNoteModal';
 import TransactionSummary from '../components/TransactionSummary';
+import NotesCard from '../components/NotesCard';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -29,7 +29,6 @@ const StockDetail = () => {
         console.error('Failed to fetch data:', error);
       }
     };
-
     fetchData();
   }, [ticker]);
 
@@ -68,12 +67,9 @@ const StockDetail = () => {
       <div className="container mx-auto p-4">
         {stock ? (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            {/* Transaction Summary */}
             <div className="lg:col-span-4">
-            <TransactionSummary notes={notes} ticker={ticker} />
+              <TransactionSummary notes={notes} ticker={ticker} />
             </div>
-            
-            {/* Existing components */}
             <div className="lg:col-span-3 card bg-base-100 shadow-xl">
               <div className="card-body p-0">
                 <StockChart
@@ -85,12 +81,13 @@ const StockDetail = () => {
               </div>
             </div>
             <div className="lg:col-span-1">
-              <NotesPanel
+              <NotesCard
                 notes={notes}
                 selectedNote={selectedNote}
                 setSelectedNote={setSelectedNote}
                 updateNote={updateExistingNote}
                 deleteNote={deleteExistingNote}
+                addNote={addNote}
                 openAddNoteModal={() => setIsAddModalOpen(true)}
               />
             </div>
