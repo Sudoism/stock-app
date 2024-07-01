@@ -10,7 +10,7 @@ function NoteDetail({ note, updateNote, deleteNote, onClose }) {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split('T')[0]; // This will give us YYYY-MM-DD
   };
 
   const handleDelete = () => {
@@ -35,6 +35,16 @@ function NoteDetail({ note, updateNote, deleteNote, onClose }) {
           </div>
           <p className="text-sm text-gray-600 mb-2">{formatDate(note.noteDate)}</p>
           <p className="text-base mb-6">{note.content}</p>
+          
+          {note.transactionType && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Transaction Details</h3>
+              <p>Type: {note.transactionType}</p>
+              <p>Price: ${note.price}</p>
+              <p>Quantity: {note.quantity}</p>
+            </div>
+          )}
+          
           <div className="flex justify-end space-x-2">
             <button className="btn btn-ghost btn-sm p-2" onClick={() => setIsEditModalOpen(true)} aria-label="Edit">
               <FontAwesomeIcon icon={faPen} />

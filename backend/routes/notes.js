@@ -9,7 +9,7 @@ router.get('/:ticker', async (req, res) => {
     if (notes) {
       res.json(notes);
     } else {
-      res.status(404).json({ error: 'Stock not found' });
+      res.status(404).json({ error: 'No notes found for this stock' });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -19,12 +19,12 @@ router.get('/:ticker', async (req, res) => {
 // Create a new note
 router.post('/', async (req, res) => {
   try {
-    const { stockId, content, noteDate } = req.body;
+    const { stockId, content, noteDate, transactionType, price, quantity } = req.body;
     if (typeof content === 'object') {
       res.status(400).send({ error: 'Content must be a string.' });
       return;
     }
-    const note = await noteService.createNote({ stockId, content, noteDate });
+    const note = await noteService.createNote({ stockId, content, noteDate, transactionType, price, quantity });
     res.status(201).json(note);
   } catch (error) {
     res.status(500).json({ error: error.message });

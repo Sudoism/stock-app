@@ -3,7 +3,13 @@ const { Note, Stock } = require('../models');
 const getNotesByTicker = async (ticker) => {
   const stock = await Stock.findOne({ where: { ticker } });
   if (stock) {
-    return Note.findAll({ where: { stockId: stock.id } });
+    return Note.findAll({ 
+      where: { stockId: stock.id },
+      include: [{
+        model: Stock,
+        attributes: ['ticker']  // Include the ticker in the response
+      }]
+    });
   }
   return null;
 };

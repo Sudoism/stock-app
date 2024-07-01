@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 const Stock = require('./models/stock')(sequelize, DataTypes);
 const Note = require('./models/note')(sequelize, DataTypes);
 
-sequelize.sync()
+sequelize.sync({force: true})
   .then(() => {
     console.log('Database synced successfully.');
   })
