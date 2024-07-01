@@ -22,7 +22,7 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
         const parsedData = d3.csvParse(response.data);
         parsedData.forEach(d => {
           d.date = d3.timeParse("%Y-%m-%d")(d.Date);
-          d.price = +d['Adj Close'];
+          d.price = +d['Close'];
         });
         setData(parsedData);
       } catch (error) {
@@ -93,16 +93,37 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
           console.warn('No matching data point found for note date:', note.noteDate);
           return;
         }
-        svg.append('circle')
-          .attr('cx', x(noteData.date))
-          .attr('cy', y(noteData.price))
-          .attr('r', 5)
-          .attr('fill', selectedNote && selectedNote.id === note.id ? 'red' : 'blue')
+
+        const isSelected = selectedNote && selectedNote.id === note.id;
+        let fillColor = 'gray';  // Default color for notes without transactions
+        if (note.transactionType === 'buy') fillColor = 'green';
+        if (note.transactionType === 'sell') fillColor = 'red';
+
+        const group = svg.append('g')
+          .attr('transform', `translate(${x(noteData.date)},${y(noteData.price)})`)
           .on('click', (event) => {
             event.stopPropagation();
             setSelectedNote(note);
-          })
-          .append('title')
+          });
+
+        // Circle
+        group.append('circle')
+          .attr('r', isSelected ? 18 : 10)  // Larger radius for selected notes
+          .attr('fill', fillColor)
+          .attr('stroke', isSelected ? 'white' : 'none')
+          .attr('stroke-width', isSelected ? 2 : 0);
+
+        // Text (quantity)
+        if (note.transactionType && note.quantity) {
+          group.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dy', '.3em')
+            .attr('fill', 'white')
+            .style('font-size', isSelected ? '14px' : '10px')  // Larger font for selected notes
+            .text(note.quantity);
+        }
+
+        group.append('title')
           .text(note.content);
       });
     };
