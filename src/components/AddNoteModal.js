@@ -76,6 +76,18 @@ const AddNoteModal = ({ isOpen, onRequestClose, addNote }) => {
             <>
               <div className="form-control mb-4">
                 <label className="label">
+                  <span className="label-text">Quantity</span>
+                </label>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  required
+                  className="input input-bordered w-full"
+                />
+              </div>
+              <div className="form-control mb-4">
+                <label className="label">
                   <span className="label-text">Price</span>
                 </label>
                 <input
@@ -83,18 +95,6 @@ const AddNoteModal = ({ isOpen, onRequestClose, addNote }) => {
                   step="0.01"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  required
-                  className="input input-bordered w-full"
-                />
-              </div>
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Quantity</span>
-                </label>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
                   required
                   className="input input-bordered w-full"
                 />

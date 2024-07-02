@@ -70,26 +70,30 @@ const StockDetail = () => {
             <div className="lg:col-span-4">
               <TransactionSummary notes={notes} ticker={ticker} />
             </div>
-            <div className="lg:col-span-3 card bg-base-100 shadow-xl">
-              <div className="card-body p-0">
-                <StockChart
-                  ticker={ticker}
-                  notes={notes}
-                  selectedNote={selectedNote}
-                  setSelectedNote={setSelectedNote}
-                />
+            <div className="lg:col-span-3">
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body p-0">
+                  <StockChart
+                    ticker={ticker}
+                    notes={notes}
+                    selectedNote={selectedNote}
+                    setSelectedNote={setSelectedNote}
+                  />
+                </div>
               </div>
             </div>
             <div className="lg:col-span-1">
-              <NotesCard
-                notes={notes}
-                selectedNote={selectedNote}
-                setSelectedNote={setSelectedNote}
-                updateNote={updateExistingNote}
-                deleteNote={deleteExistingNote}
-                addNote={addNote}
-                openAddNoteModal={() => setIsAddModalOpen(true)}
-              />
+              <div className="card bg-base-100 shadow-xl h-full">
+                <NotesCard
+                  notes={notes}
+                  selectedNote={selectedNote}
+                  setSelectedNote={setSelectedNote}
+                  updateNote={updateExistingNote}
+                  deleteNote={deleteExistingNote}
+                  addNote={addNote}
+                  openAddNoteModal={() => setIsAddModalOpen(true)}
+                />
+              </div>
             </div>
             <div className="lg:col-span-2">
               <StockInfo ticker={ticker} />
