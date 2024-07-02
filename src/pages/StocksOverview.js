@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getStocks, getNotes, createStock } from '../api';
+import { getStocksWithDetails, createStock } from '../api';
 import StockForm from '../components/StockForm';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -13,26 +13,8 @@ const StocksOverview = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const stocksResponse = await getStocks();
-        const stocksWithDetails = await Promise.all(
-          stocksResponse.data.map(async (stock) => {
-            const notesResponse = await getNotes(stock.ticker);
-            const notes = notesResponse.data;
-            const latestNoteDate = notes.length > 0 
-              ? new Date(Math.max(...notes.map(note => new Date(note.noteDate))))
-              : null;
-            const sharesOwned = notes.reduce((total, note) => {
-              if (note.transactionType === 'buy') {
-                return total + note.quantity;
-              } else if (note.transactionType === 'sell') {
-                return total - note.quantity;
-              }
-              return total;
-            }, 0);
-            return { ...stock, latestNoteDate, sharesOwned };
-          })
-        );
-        setStocks(stocksWithDetails);
+        const response = await getStocksWithDetails();
+        setStocks(response.data);
       } catch (error) {
         console.error('Failed to fetch stocks data:', error);
       }
@@ -44,7 +26,7 @@ const StocksOverview = () => {
   const handleCreateStock = async (stock) => {
     try {
       const response = await createStock(stock);
-      setStocks([...stocks, { ...response.data, latestNoteDate: null, sharesOwned: 0 }]);
+      setStocks([...stocks, response.data]);
       setIsModalOpen(false);
     } catch (error) {
       console.error('Failed to create stock:', error);

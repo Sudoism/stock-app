@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const stockService = require('../services/stockService');
 
+// Get all stocks with details
+router.get('/with-details', async (req, res) => {
+  console.log("Reached")
+  try {
+    const stocks = await stockService.getStocksWithDetails();
+    res.json(stocks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all stocks
 router.get('/', async (req, res) => {
   try {
@@ -35,5 +46,6 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 module.exports = router;
