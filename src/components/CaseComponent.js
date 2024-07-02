@@ -43,34 +43,35 @@ const CaseComponent = ({ ticker, initialContent, onSave }) => {
 
   return (
     <div className="card bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h2 className="card-title">Investment Case</h2>
+      <div className="card-body p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="card-title">Investment Case</h2>
+          {isEditing ? (
+            <button className="btn btn-sm" onClick={handleSave}>
+              Save
+            </button>
+          ) : (
+            <button
+              className="btn btn-sm btn-ghost"
+              onClick={() => setIsEditing(true)}
+              aria-label="Edit"
+            >
+              <FontAwesomeIcon icon={faPen} />
+            </button>
+          )}
+        </div>
         {isEditing ? (
           <div>
             <textarea
-              className="textarea textarea-bordered w-full"
+              className="textarea textarea-bordered w-full text-sm text-gray-600"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows="10"
             />
-            <div className="card-actions justify-end mt-4">
-              <button className="btn" onClick={handleSave}>
-                Save
-              </button>
-            </div>
           </div>
         ) : (
-          <div>
-            <pre className="whitespace-pre-wrap">{content}</pre>
-            <div className="card-actions justify-end mt-4">
-              <button
-                className="btn btn-sm btn-ghost"
-                onClick={() => setIsEditing(true)}
-                aria-label="Edit"
-              >
-                <FontAwesomeIcon icon={faPen} />
-              </button>
-            </div>
+          <div className="p-2 bg-base-100 rounded">
+            <div className="text-sm text-gray-600 whitespace-pre-wrap">{content}</div>
           </div>
         )}
       </div>
