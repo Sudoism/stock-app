@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStock, getNotes, createNote, updateNote, deleteNote } from '../api';
+import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase } from '../api';
 import StockChart from '../components/StockChart';
 import StockInfo from '../components/StockInfo';
 import FinancialHealth from '../components/FinancialHealth';
@@ -8,6 +8,7 @@ import Header from '../components/Header';
 import AddNoteModal from '../components/AddNoteModal';
 import TransactionSummary from '../components/TransactionSummary';
 import NotesCard from '../components/NotesCard';
+import CaseComponent from '../components/CaseComponent';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -15,16 +16,19 @@ const StockDetail = () => {
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [caseContent, setCaseContent] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [stockResponse, notesResponse] = await Promise.all([
+        const [stockResponse, notesResponse, caseResponse] = await Promise.all([
           getStock(ticker),
-          getNotes(ticker)
+          getNotes(ticker),
+          getCase(ticker)
         ]);
         setStock(stockResponse.data);
         setNotes(notesResponse.data);
+        setCaseContent(caseResponse.data?.content || '');
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
@@ -61,14 +65,30 @@ const StockDetail = () => {
     }
   };
 
+  const handleCaseSave = async (content) => {
+    try {
+      await createOrUpdateCase(ticker, content);
+      setCaseContent(content);
+    } catch (error) {
+      console.error('Failed to update case:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-200">
       <Header title={stock ? stock.name : 'Loading...'} />
       <div className="container mx-auto p-4">
         {stock ? (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-2">
               <TransactionSummary notes={notes} ticker={ticker} />
+            </div>
+            <div className="lg:col-span-2">
+              <CaseComponent
+                ticker={ticker}
+                initialContent={caseContent}
+                onSave={handleCaseSave}
+              />
             </div>
             <div className="lg:col-span-3 card bg-base-100 shadow-xl">
               <div className="card-body p-0">

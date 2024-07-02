@@ -18,9 +18,10 @@ app.use(bodyParser.json());
 
 const Stock = require('./models/stock')(sequelize, DataTypes);
 const Note = require('./models/note')(sequelize, DataTypes);
+const Case = require('./models/case')(sequelize, DataTypes);
 
-// sequelize.sync({force: true})
-sequelize.sync()
+sequelize.sync({force: true})
+//sequelize.sync()
   .then(() => {
     console.log('Database synced successfully.');
   })
@@ -30,9 +31,11 @@ sequelize.sync()
 
 const stockRoutes = require('./routes/stocks');
 const noteRoutes = require('./routes/notes');
+const caseRoutes = require('./routes/cases');
 
 app.use('/api/stocks', stockRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/cases', caseRoutes);
 
 app.get('/', (req, res) => {
   res.send('Stock App Backend');

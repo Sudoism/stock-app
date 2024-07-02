@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Stock.associate = (models) => {
     Stock.hasMany(models.Note, { foreignKey: 'stockId' });
+    Stock.hasOne(models.Case, { foreignKey: 'ticker', sourceKey: 'ticker' });
   };
 
   return Stock;
