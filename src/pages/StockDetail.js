@@ -80,17 +80,20 @@ const StockDetail = () => {
       <div className="container mx-auto p-4">
         {stock ? (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="lg:col-span-2">
-              <TransactionSummary notes={notes} ticker={ticker} />
-            </div>
-            <div className="lg:col-span-2">
+          
+
+            <div className="lg:col-span-3 flex flex-col h-full">
               <CaseComponent
                 ticker={ticker}
                 initialContent={caseContent}
                 onSave={handleCaseSave}
               />
             </div>
-            <div className="lg:col-span-3 card bg-base-100 shadow-xl">
+            <div className="lg:col-span-1 flex flex-col h-full">
+              <TransactionSummary notes={notes} ticker={ticker} />
+            </div>
+
+            <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col h-full">
               <div className="card-body p-0">
                 <StockChart
                   ticker={ticker}
@@ -100,7 +103,7 @@ const StockDetail = () => {
                 />
               </div>
             </div>
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 flex flex-col h-full">
               <NotesCard
                 notes={notes}
                 selectedNote={selectedNote}
@@ -111,10 +114,10 @@ const StockDetail = () => {
                 openAddNoteModal={() => setIsAddModalOpen(true)}
               />
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 flex flex-col h-full">
               <StockInfo ticker={ticker} />
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 flex flex-col h-full">
               <FinancialHealth ticker={ticker} />
             </div>
           </div>
