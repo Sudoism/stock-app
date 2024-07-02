@@ -101,7 +101,7 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
         <div className="mt-4">
           <button
             onClick={openAddNoteModal}
-            className="btn btn-primary btn-block"
+            className="btn btn-block"
           >
             Add Note
           </button>

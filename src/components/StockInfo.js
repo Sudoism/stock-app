@@ -5,7 +5,6 @@ const StockInfo = ({ ticker }) => {
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const fetchStockInfo = async () => {
@@ -71,20 +70,7 @@ const StockInfo = ({ ticker }) => {
           <p><strong>Market Cap:</strong> {formatMarketCap(info.mktCap)}</p>
           <p><strong>CEO:</strong> {info.ceo || 'N/A'}</p>
           <p><strong>Employees:</strong> {info.fullTimeEmployees ? info.fullTimeEmployees.toLocaleString() : 'N/A'}</p>
-          <p>
-            <strong>Description: </strong>
-            {info.description ? (
-              <>
-                {isExpanded ? info.description : `${info.description.substring(0, 100)}...`}
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="btn btn-link btn-xs ml-2"
-                >
-                  {isExpanded ? 'Show less' : 'Show more'}
-                </button>
-              </>
-            ) : 'N/A'}
-          </p>
+          <p><strong>Description:</strong> {info.description || 'N/A'}</p> 
         </div>
       </div>
     </div>

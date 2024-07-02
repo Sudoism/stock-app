@@ -51,10 +51,10 @@ const StockForm = ({ onCreate, onCancel }) => {
         />
       </div>
       <div className="flex justify-end space-x-2">
-        <button type="button" onClick={onCancel} className="btn btn-ghost">
+        <button type="button" onClick={onCancel} className="btn">
           Cancel
         </button>
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn">
           Add Stock
         </button>
       </div>
