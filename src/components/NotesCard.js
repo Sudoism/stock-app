@@ -38,14 +38,14 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
         {selectedNote.transactionType && (
           <div className="mb-4 text-sm">
             <p>
-              {selectedNote.transactionType === 'buy' ? 'Bought' : 'Sold'}:{' '}
-              <strong>${(selectedNote.price * selectedNote.quantity).toFixed(2)}</strong>
+            <strong>{selectedNote.transactionType === 'buy' ? 'Bought' : 'Sold'}:</strong>{' '}
+              ${(selectedNote.price * selectedNote.quantity).toFixed(2)}
             </p>
             <p>
-              Quantity: <strong>{selectedNote.quantity}</strong>
+            <strong>Quantity:</strong> {selectedNote.quantity}
             </p>
             <p>
-              Quote: <strong>${parseFloat(selectedNote.price).toFixed(2)}</strong>
+            <strong>Quote:</strong> ${parseFloat(selectedNote.price).toFixed(2)}
             </p>
           </div>
         )}
