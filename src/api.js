@@ -13,6 +13,8 @@ export const createNote = (data) => axios.post(`${API_URL}/notes`, data);
 export const getCase = (ticker) => axios.get(`${API_URL}/cases/${ticker}`);
 export const createOrUpdateCase = (ticker, content) => axios.post(`${API_URL}/cases/${ticker}`, { content });
 
+export const getFinancialRatios = (ticker) => axios.get(`${API_URL}/financial-ratios/${ticker}`);
+
 export const updateNote = (data) => {
   return axios.put(`${API_URL}/notes/${data.id}`, data); 
 };

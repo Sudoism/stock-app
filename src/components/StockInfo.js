@@ -5,6 +5,7 @@ const StockInfo = ({ ticker }) => {
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedField, setExpandedField] = useState(null);
 
   useEffect(() => {
     const fetchStockInfo = async () => {
@@ -57,21 +58,44 @@ const StockInfo = ({ ticker }) => {
     }
   };
 
+  const stockData = [
+    { label: 'Sector', value: info.sector },
+    { label: 'Industry', value: info.industry },
+    { label: 'Country', value: info.country },
+    { label: 'IPO Date', value: info.ipoDate },
+    { label: 'Exchange', value: info.exchangeShortName },
+    { label: 'Market Cap', value: formatMarketCap(info.mktCap) },
+    { label: 'CEO', value: info.ceo },
+    { label: 'Employees', value: info.fullTimeEmployees ? info.fullTimeEmployees.toLocaleString() : 'N/A' },
+    { label: 'Description', value: info.description, isLong: true },
+  ];
+
+  const toggleExpand = (index) => {
+    setExpandedField(expandedField === index ? null : index);
+  };
+
   return (
-    <div className="card bg-base-100 shadow-xl">
+    <div className="card bg-base-100 shadow-xl overflow-x-auto">
       <div className="card-body">
         <h2 className="card-title">{ticker} Stock Information</h2>
-        <div className="space-y-2">
-          <p><strong>Sector:</strong> {info.sector || 'N/A'}</p>
-          <p><strong>Industry:</strong> {info.industry || 'N/A'}</p>
-          <p><strong>Country:</strong> {info.country || 'N/A'}</p>
-          <p><strong>IPO Date:</strong> {info.ipoDate || 'N/A'}</p>
-          <p><strong>Exchange:</strong> {info.exchangeShortName || 'N/A'}</p>
-          <p><strong>Market Cap:</strong> {formatMarketCap(info.mktCap)}</p>
-          <p><strong>CEO:</strong> {info.ceo || 'N/A'}</p>
-          <p><strong>Employees:</strong> {info.fullTimeEmployees ? info.fullTimeEmployees.toLocaleString() : 'N/A'}</p>
-          <p><strong>Description:</strong> {info.description || 'N/A'}</p> 
-        </div>
+        <table className="table w-full">
+          <tbody>
+            {stockData.map((item, index) => (
+              <tr 
+                key={index}
+                className={`hover:bg-base-200 cursor-pointer transition-colors duration-200 ease-in-out ${expandedField === index ? 'bg-base-200' : ''}`}
+                onClick={() => toggleExpand(index)}
+              >
+                <td className="w-1/4">{item.label}</td>
+                <td className="w-3/4">
+                  {item.isLong 
+                    ? (expandedField === index ? item.value : `${item.value.substring(0, 100)}...`) 
+                    : (item.value || 'N/A')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -20,8 +20,7 @@ const Stock = require('./models/stock')(sequelize, DataTypes);
 const Note = require('./models/note')(sequelize, DataTypes);
 const Case = require('./models/case')(sequelize, DataTypes);
 
-sequelize.sync({force: true})
-//sequelize.sync()
+sequelize.sync({alter: true})
   .then(() => {
     console.log('Database synced successfully.');
   })
@@ -32,10 +31,12 @@ sequelize.sync({force: true})
 const stockRoutes = require('./routes/stocks');
 const noteRoutes = require('./routes/notes');
 const caseRoutes = require('./routes/cases');
+const financialRatiosRoutes = require('./routes/financialRatios');
 
 app.use('/api/stocks', stockRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/cases', caseRoutes);
+app.use('/api/financial-ratios', financialRatiosRoutes);
 
 app.get('/', (req, res) => {
   res.send('Stock App Backend');

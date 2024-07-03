@@ -9,6 +9,7 @@ import AddNoteModal from '../components/AddNoteModal';
 import TransactionSummary from '../components/TransactionSummary';
 import NotesCard from '../components/NotesCard';
 import CaseComponent from '../components/CaseComponent';
+import FinancialRatiosComponent from '../components/FinancialRatiosComponent';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -80,8 +81,6 @@ const StockDetail = () => {
       <div className="container mx-auto p-4">
         {stock ? (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          
-
             <div className="lg:col-span-3 flex flex-col h-full">
               <CaseComponent
                 ticker={ticker}
@@ -114,8 +113,13 @@ const StockDetail = () => {
                 openAddNoteModal={() => setIsAddModalOpen(true)}
               />
             </div>
-            <div className="lg:col-span-2 flex flex-col h-full">
+
+            <div className="lg:col-span-4 flex flex-col h-full">
               <StockInfo ticker={ticker} />
+            </div>
+
+            <div className="lg:col-span-2 flex flex-col h-full">
+              <FinancialRatiosComponent ticker={ticker} />
             </div>
             <div className="lg:col-span-2 flex flex-col h-full">
               <FinancialHealth ticker={ticker} />

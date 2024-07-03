@@ -40,8 +40,15 @@ const getFinancialStatement = async (symbol) => {
   });
 };
 
+const getFinancialRatios = async (symbol) => {
+  return cachedAxiosGet(`https://financialmodelingprep.com/api/v3/key-metrics-ttm/${symbol}`, {
+    apikey: process.env.FMP_API_KEY
+  });
+};
+
 module.exports = {
   getYahooStockData,
   getStockDetails,
-  getFinancialStatement
+  getFinancialStatement,
+  getFinancialRatios
 };
