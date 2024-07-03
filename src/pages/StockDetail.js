@@ -114,14 +114,14 @@ const StockDetail = () => {
               />
             </div>
 
-            <div className="lg:col-span-4 flex flex-col h-full">
+            <div className="lg:col-span-2 flex flex-col h-full">
               <StockInfo ticker={ticker} />
             </div>
 
             <div className="lg:col-span-2 flex flex-col h-full">
               <FinancialRatiosComponent ticker={ticker} />
             </div>
-            <div className="lg:col-span-2 flex flex-col h-full">
+            <div className="lg:col-span-4 flex flex-col h-full">
               <FinancialHealth ticker={ticker} />
             </div>
           </div>

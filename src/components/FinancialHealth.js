@@ -23,29 +23,18 @@ const FinancialHealth = ({ ticker }) => {
     fetchFinancialData();
   }, [ticker]);
 
-  if (loading) {
-    return (
-      <div className="card bg-base-100 shadow-xl p-4">
-        <div className="flex items-center justify-center h-64">
-          <div className="loading loading-spinner loading-lg"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || financialData.length === 0) {
-    return (
-      <div className="card bg-base-100 shadow-xl p-4">
-        <div className="flex items-center justify-center h-64 text-gray-500">
-          <p>{error || 'No financial data available for this stock.'}</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="loading loading-lg"></div>;
+  if (error) return <div className="alert alert-error">{error}</div>;
+  if (financialData.length === 0) return <div className="alert alert-info">No financial data available</div>;
 
   const formatNumber = (num) => {
     if (num === undefined || isNaN(num)) return 'N/A';
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', compactDisplay: 'short' }).format(num);
+  };
+
+  const formatPercentage = (num) => {
+    if (num === undefined || isNaN(num)) return 'N/A';
+    return `${(num * 100).toFixed(2)}%`;
   };
 
   const calculateFreeCashFlow = (data) => {
@@ -55,41 +44,129 @@ const FinancialHealth = ({ ticker }) => {
     return operatingCashFlow - capex;
   };
 
-  const calculateLongTermAssets = (data) => {
-    return data.assets - data.assetscurrent;
+  const calculateGrossMargin = (data) => {
+    const revenue = data.revenuefromcontractwithcustomerexcludingassessedtax;
+    const cogs = data.costofgoodsandservicessold;
+    if (revenue === undefined || cogs === undefined) return undefined;
+    return (revenue - cogs) / revenue;
   };
 
-  const calculateLongTermLiabilities = (data) => {
-    return data.liabilities - data.liabilitiescurrent;
+  const calculateOperatingMargin = (data) => {
+    const operatingIncome = data.operatingincomeloss;
+    const revenue = data.revenuefromcontractwithcustomerexcludingassessedtax;
+    if (operatingIncome === undefined || revenue === undefined) return undefined;
+    return operatingIncome / revenue;
+  };
+
+  const calculateNetProfitMargin = (data) => {
+    const netIncome = data.netincomeloss;
+    const revenue = data.revenuefromcontractwithcustomerexcludingassessedtax;
+    if (netIncome === undefined || revenue === undefined) return undefined;
+    return netIncome / revenue;
   };
 
   const financialMetrics = [
     {
       section: "Income Statement",
       metrics: [
-        { label: 'Revenue', key: 'revenuefromcontractwithcustomerexcludingassessedtax', description: 'Total amount of money earned from selling goods or services. Increasing revenue year-over-year is generally positive, but consider the growth rate in context of the industry and company size. Stable or accelerating growth is ideal.' },
-        { label: 'Cost of Goods Sold', key: 'costofgoodsandservicessold', description: 'Direct costs attributable to the production of goods sold. A decreasing COGS relative to revenue indicates improving efficiency, but this varies by industry. Look for a downward trend in COGS as a percentage of revenue.' },
-        { label: 'Gross Profit', key: 'grossprofit', description: 'Revenue minus COGS. A higher gross profit margin (gross profit / revenue) is generally better. Industry averages vary, but margins above 50% are often considered good for many industries. Look for stable or increasing margins over time.' },
-        { label: 'Operating Expenses', key: 'operatingexpenses', description: 'Expenses incurred in normal business operations. Lower is generally better, but not at the expense of growth or quality. Look for stable or decreasing OpEx as a percentage of revenue over time. Sudden increases should be investigated.' },
-        { label: 'Net Income', key: 'netincomeloss', description: 'Total earnings after all expenses and taxes. Positive and growing net income is generally good. For mature companies, consistent growth is ideal. For high-growth companies, increasing losses might be acceptable if paired with strong revenue growth.' },
+        { 
+          label: 'Revenue', 
+          key: 'revenuefromcontractwithcustomerexcludingassessedtax', 
+          description: 'Total amount of money earned from selling goods or services. Look for consistent growth over the years. Sudden changes may indicate new product launches, market expansion, or potential challenges. Compare growth rates to industry averages.' 
+        },
+        { 
+          label: 'Cost of Goods Sold', 
+          key: 'costofgoodsandservicessold', 
+          description: 'Direct costs attributable to the production of goods sold. A decreasing trend relative to revenue indicates improving efficiency. However, drastic reductions might signal quality issues. Consider industry norms and company-specific factors.' 
+        },
+        { 
+          label: 'Gross Profit', 
+          key: 'grossprofit', 
+          description: 'Revenue minus Cost of Goods Sold. Should generally increase with revenue. If gross profit growth outpaces revenue growth, it suggests improving efficiency or pricing power.' 
+        },
+        { 
+          label: 'Gross Margin', 
+          calculate: calculateGrossMargin, 
+          format: formatPercentage, 
+          description: 'Gross Profit as a percentage of Revenue. Higher margins indicate better efficiency in production and pricing power. Look for stability or upward trends. Sudden drops may signal pricing pressures or rising costs. Compare with industry peers as ideal margins vary by sector.' 
+        },
+        { 
+          label: 'Operating Expenses', 
+          key: 'operatingexpenses', 
+          description: 'Expenses incurred in normal business operations. Should grow more slowly than revenue for improving profitability. Rapid increases might indicate expansion efforts or potential inefficiencies. Consider the nature of the business and growth stage.' 
+        },
+        { 
+          label: 'Operating Income', 
+          key: 'operatingincomeloss', 
+          description: 'Profit from business operations before interest and taxes. Should grow faster than revenue for improving operational efficiency. Consistent growth indicates strong core business performance.' 
+        },
+        { 
+          label: 'Operating Margin', 
+          calculate: calculateOperatingMargin, 
+          format: formatPercentage, 
+          description: 'Operating Income as a percentage of Revenue. Reflects operational efficiency and pricing power. Higher margins are generally better, but compare with industry norms. Increasing margins over time suggest improving operations or scalability.' 
+        },
+        { 
+          label: 'Net Income', 
+          key: 'netincomeloss', 
+          description: 'Company\'s total earnings or profit. Should show consistent growth over time. Volatile or declining net income might indicate business challenges or heavy investments. Consider alongside revenue trends and industry conditions.' 
+        },
+        { 
+          label: 'Net Profit Margin', 
+          calculate: calculateNetProfitMargin, 
+          format: formatPercentage, 
+          description: 'Net Income as a percentage of Revenue. Higher margins indicate better overall profitability. Increasing margins suggest improving efficiency or scalability. Declining margins might signal rising costs or competitive pressures. Compare trends with industry peers.' 
+        },
       ]
     },
     {
       section: "Balance Sheet",
       metrics: [
-        { label: 'Current Assets', key: 'assetscurrent', description: 'Assets expected to be converted to cash within one year. Higher current assets can indicate better liquidity, but too high might suggest inefficient use of resources. A current ratio (current assets / current liabilities) between 1.5 and 3 is often considered healthy.' },
-        { label: 'Long-Term Assets', key: 'longTermAssets', calculate: calculateLongTermAssets, description: 'Assets not expected to be converted to cash within a year. The importance varies by industry. For capital-intensive industries, look for efficient use of these assets in generating revenue. Calculate the asset turnover ratio (revenue / total assets) and compare it to industry peers.' },
-        { label: 'Current Liabilities', key: 'liabilitiescurrent', description: 'Obligations due within one year. Lower is generally better, but compare with current assets. A current ratio above 1 is good, but too high might indicate inefficient use of capital. Look for stability or improvement in this ratio over time.' },
-        { label: 'Long-Term Liabilities', key: 'longTermLiabilities', calculate: calculateLongTermLiabilities, description: 'Obligations not due within a year. While some debt can be beneficial, too much can be risky. Compare with equity (debt-to-equity ratio) and cash flows. A debt-to-equity ratio below 2 is often considered good, but this varies by industry.' },
+        { 
+          label: 'Current Assets', 
+          key: 'assetscurrent', 
+          description: 'Assets expected to be converted to cash within one year. Should generally increase with business growth. A significant decrease might indicate cash flow issues or strategic changes. Compare with current liabilities for liquidity assessment.' 
+        },
+        { 
+          label: 'Total Assets', 
+          key: 'assets', 
+          description: 'Total of all assets owned by the company. Should grow over time with the business. Rapid increases might indicate acquisitions or major investments. Decreases could signal asset sales or write-downs. Consider alongside revenue and profitability trends.' 
+        },
+        { 
+          label: 'Current Liabilities', 
+          key: 'liabilitiescurrent', 
+          description: 'Obligations due within one year. Should be manageable relative to current assets. Rapid increases might indicate cash flow challenges or aggressive short-term financing. Compare growth rate to current assets and revenue.' 
+        },
+        { 
+          label: 'Total Liabilities', 
+          key: 'liabilities', 
+          description: 'Total of all liabilities owed by the company. Monitor the growth rate relative to assets and equity. Excessive liability growth might indicate overleveraging. Consider industry norms and companys growth stage.' 
+        },
+        { 
+          label: 'Stockholders\' Equity', 
+          key: 'stockholdersequity', 
+          description: 'Total assets minus total liabilities; represents the book value of the company. Should generally increase over time through retained earnings. Decreases might indicate losses, dividends, or share buybacks. Consider alongside market capitalization for valuation insights.' 
+        },
       ]
     },
     {
       section: "Cash Flow",
       metrics: [
-        { label: 'Operating Cash Flow', key: 'netcashprovidedbyusedinoperatingactivities', description: 'Cash generated from normal business operations. Positive and growing OCF is generally good. Compare with net income to assess earnings quality. OCF consistently higher than net income often indicates high-quality earnings. Look for a stable or increasing OCF to net income ratio.' },
-        { label: 'Investing Cash Flow', key: 'netcashprovidedbyusedininvestingactivities', description: 'Cash used in investing activities. Negative values are common and can indicate investment in growth. However, consistently large negative values should be investigated. Compare with OCF to ensure investments are sustainable.' },
-        { label: 'Financing Cash Flow', key: 'netcashprovidedbyusedinfinancingactivities', description: 'Cash from financing activities. For growing companies, positive values (indicating cash raised) can be good. For mature companies, negative values (indicating dividends or buybacks) might be preferred. Look for consistency with the company\'s stated capital allocation strategy.' },
-        { label: 'Free Cash Flow', key: 'freeCashFlow', calculate: calculateFreeCashFlow, description: 'Cash left after capital expenditures. Positive and growing FCF is generally good, indicating the company can fund operations and growth. However, negative FCF isn\'t always bad if due to investments in future growth. Compare FCF to net income; FCF should ideally be close to or higher than net income.' },
+        { 
+          label: 'Operating Cash Flow', 
+          key: 'netcashprovidedbyusedinoperatingactivities', 
+          description: 'Cash generated from normal business operations. Should be consistently positive and growing. Negative or declining OCF might indicate profitability issues or working capital challenges. Compare with net income for earnings quality assessment.' 
+        },
+        { 
+          label: 'Capital Expenditures', 
+          key: 'paymentstoacquirepropertyplantandequipment', 
+          description: 'Funds used to acquire or upgrade physical assets. Reflects investment in future growth. High CapEx might indicate expansion but could pressure short-term cash flows. Evaluate in context of industry and growth strategy.' 
+        },
+        { 
+          label: 'Free Cash Flow', 
+          calculate: calculateFreeCashFlow, 
+          description: 'Operating Cash Flow minus Capital Expenditures. Represents cash available for dividends, debt repayment, or reinvestment. Consistent positive FCF is generally favorable. Negative FCF might be acceptable for growth companies but warrants scrutiny for mature firms.' 
+        },
       ]
     }
   ];
@@ -123,16 +200,16 @@ const FinancialHealth = ({ ticker }) => {
                   </td>
                 </tr>
                 {section.metrics.map((metric, metricIndex) => (
-                  <React.Fragment key={metric.key}>
+                  <React.Fragment key={metric.key || metric.label}>
                     <tr 
-                      className={`hover:bg-base-200 cursor-pointer transition-colors duration-200 ease-in-out ${expandedMetric === `${sectionIndex}-${metricIndex}` ? 'bg-base-200' : ''}`}
+                      className={`hover:bg-base-200 cursor-pointer transition-colors duration-100 ease-in-out ${expandedMetric === `${sectionIndex}-${metricIndex}` ? 'bg-base-200' : ''}`}
                       onClick={() => toggleExpand(sectionIndex, metricIndex)}
                     >
                       <td className="w-1/4">{metric.label}</td>
                       {financialData.map((data, index) => (
                         <td key={data.date} className="text-right" style={{width: `${75 / financialData.length}%`}}>
                           {metric.calculate
-                            ? formatNumber(metric.calculate(data))
+                            ? (metric.format || formatNumber)(metric.calculate(data))
                             : formatNumber(data[metric.key])}
                         </td>
                       ))}

@@ -83,7 +83,7 @@ const StockInfo = ({ ticker }) => {
             {stockData.map((item, index) => (
               <tr 
                 key={index}
-                className={`hover:bg-base-200 cursor-pointer transition-colors duration-200 ease-in-out ${expandedField === index ? 'bg-base-200' : ''}`}
+                className={`hover:bg-base-200 cursor-pointer ${expandedField === index ? 'bg-base-200' : ''}`}
                 onClick={() => toggleExpand(index)}
               >
                 <td className="w-1/4">{item.label}</td>
