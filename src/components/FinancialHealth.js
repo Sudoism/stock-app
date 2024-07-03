@@ -37,6 +37,15 @@ const FinancialHealth = ({ ticker }) => {
     return `${(num * 100).toFixed(2)}%`;
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  const getRevenue = (data) => {
+    return data.revenuefromcontractwithcustomerexcludingassessedtax || data.revenues;
+  };
+
   const calculateFreeCashFlow = (data) => {
     const operatingCashFlow = data.netcashprovidedbyusedinoperatingactivities;
     const capex = data.paymentstoacquirepropertyplantandequipment;
@@ -45,22 +54,22 @@ const FinancialHealth = ({ ticker }) => {
   };
 
   const calculateGrossMargin = (data) => {
-    const revenue = data.revenuefromcontractwithcustomerexcludingassessedtax;
-    const cogs = data.costofgoodsandservicessold;
+    const revenue = getRevenue(data);
+    const cogs = data.costofgoodsandservicessold || data.costofrevenue;
     if (revenue === undefined || cogs === undefined) return undefined;
     return (revenue - cogs) / revenue;
   };
 
   const calculateOperatingMargin = (data) => {
     const operatingIncome = data.operatingincomeloss;
-    const revenue = data.revenuefromcontractwithcustomerexcludingassessedtax;
+    const revenue = getRevenue(data);
     if (operatingIncome === undefined || revenue === undefined) return undefined;
     return operatingIncome / revenue;
   };
 
   const calculateNetProfitMargin = (data) => {
     const netIncome = data.netincomeloss;
-    const revenue = data.revenuefromcontractwithcustomerexcludingassessedtax;
+    const revenue = getRevenue(data);
     if (netIncome === undefined || revenue === undefined) return undefined;
     return netIncome / revenue;
   };
@@ -71,12 +80,12 @@ const FinancialHealth = ({ ticker }) => {
       metrics: [
         { 
           label: 'Revenue', 
-          key: 'revenuefromcontractwithcustomerexcludingassessedtax', 
+          getValue: getRevenue,
           description: 'Total amount of money earned from selling goods or services. Look for consistent growth over the years. Sudden changes may indicate new product launches, market expansion, or potential challenges. Compare growth rates to industry averages.' 
         },
         { 
           label: 'Cost of Goods Sold', 
-          key: 'costofgoodsandservicessold', 
+          key: ['costofgoodsandservicessold', 'costofrevenue'],
           description: 'Direct costs attributable to the production of goods sold. A decreasing trend relative to revenue indicates improving efficiency. However, drastic reductions might signal quality issues. Consider industry norms and company-specific factors.' 
         },
         { 
@@ -176,6 +185,20 @@ const FinancialHealth = ({ ticker }) => {
     setExpandedMetric(expandedMetric === key ? null : key);
   };
 
+  const getValue = (metric, data) => {
+    if (metric.getValue) {
+      return metric.getValue(data);
+    }
+    if (Array.isArray(metric.key)) {
+      for (let key of metric.key) {
+        if (data[key] !== undefined) {
+          return data[key];
+        }
+      }
+    }
+    return data[metric.key];
+  };
+
   return (
     <div className="card bg-base-100 shadow-xl overflow-x-auto">
       <div className="card-body">
@@ -186,7 +209,7 @@ const FinancialHealth = ({ ticker }) => {
               <th className="bg-base-100 text-left w-1/4">Metric</th>
               {financialData.map((data, index) => (
                 <th key={data.date} className="bg-base-100 text-right" style={{width: `${75 / financialData.length}%`}}>
-                  {new Date(data.date).getFullYear()}
+                  {formatDate(data.date)}
                 </th>
               ))}
             </tr>
@@ -200,7 +223,7 @@ const FinancialHealth = ({ ticker }) => {
                   </td>
                 </tr>
                 {section.metrics.map((metric, metricIndex) => (
-                  <React.Fragment key={metric.key || metric.label}>
+                  <React.Fragment key={metric.label}>
                     <tr 
                       className={`hover:bg-base-200 cursor-pointer transition-colors duration-100 ease-in-out ${expandedMetric === `${sectionIndex}-${metricIndex}` ? 'bg-base-200' : ''}`}
                       onClick={() => toggleExpand(sectionIndex, metricIndex)}
@@ -210,7 +233,7 @@ const FinancialHealth = ({ ticker }) => {
                         <td key={data.date} className="text-right" style={{width: `${75 / financialData.length}%`}}>
                           {metric.calculate
                             ? (metric.format || formatNumber)(metric.calculate(data))
-                            : formatNumber(data[metric.key])}
+                            : formatNumber(getValue(metric, data))}
                         </td>
                       ))}
                     </tr>
