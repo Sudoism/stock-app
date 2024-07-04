@@ -34,6 +34,12 @@ const FinancialHealth = ({ ticker }) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', compactDisplay: 'short' }).format(num);
   };
 
+    // New formatting function for F-Score metrics
+    const formatFScore = (num) => {
+      if (num === undefined || isNaN(num)) return 'N/A';
+      return num.toString();
+    };
+
   const formatPercentage = (num) => {
     if (num === undefined || isNaN(num)) return 'N/A';
     return `${(num * 100).toFixed(2)}%`;
@@ -235,26 +241,31 @@ const FinancialHealth = ({ ticker }) => {
         {
           label: 'Total Piotroski F-Score',
           calculate: (data, prevYearData) => calculatePiotroskiScore(data, prevYearData),
+          format: formatFScore,
           description: `The Piotroski F-Score is a comprehensive measure of a company's financial health, ranging from 0 to 9. A higher score (7-9) indicates stronger financial position and potential for good stock performance. Scores of 0-3 suggest weak financials. This metric is valuable for investors as it combines multiple aspects of financial health into a single, easy-to-interpret number, helping to identify potentially undervalued stocks with improving financials.`
         },
         {
           label: 'Net Income Positivity',
           calculate: (data) => data.netIncome > 0 ? 1 : 0,
+          format: formatFScore,
           description: `Positive net income (score 1) indicates profitability, a fundamental aspect of a healthy company. For investors, consistent profitability suggests the company can sustain operations, reinvest in growth, and potentially provide returns to shareholders.`
         },
         {
           label: 'Return on Assets (ROA) Positivity',
           calculate: (data) => (data.netIncome / data.totalAssets) > 0 ? 1 : 0,
+          format: formatFScore,
           description: `Positive ROA (score 1) shows the company is effectively using its assets to generate profit. This is crucial for investors as it indicates management's efficiency in utilizing the company's resources, which is especially important when comparing companies within the same industry.`
         },
         {
           label: 'Operating Cash Flow Positivity',
           calculate: (data) => data.operatingCashFlow > 0 ? 1 : 0,
+          format: formatFScore,
           description: `Positive operating cash flow (score 1) is vital as it shows the company can generate cash from its core business operations. For investors, this indicates the company's ability to fund its operations without relying on external financing, which is crucial for long-term sustainability.`
         },
         {
           label: 'Cash Flow vs Net Income',
           calculate: (data) => data.operatingCashFlow > data.netIncome ? 1 : 0,
+          format: formatFScore,
           description: `Operating cash flow exceeding net income (score 1) suggests high earnings quality. This is important for investors as it indicates that the company's profitability is backed by actual cash generation, reducing the risk of accounting manipulations and providing a more reliable picture of financial health.`
         },
         {
@@ -264,6 +275,7 @@ const FinancialHealth = ({ ticker }) => {
             const prevRatio = prevYearData ? prevYearData.totalLiabilities / prevYearData.totalAssets : Infinity;
             return currentRatio < prevRatio ? 1 : 0;
           },
+          format: formatFScore,
           description: `A decrease in long-term debt ratio (score 1) indicates improving financial health. For investors, this suggests reduced financial risk, improved solvency, and potentially more flexibility for the company to invest in growth opportunities or weather economic downturns.`
         },
         {
@@ -273,6 +285,7 @@ const FinancialHealth = ({ ticker }) => {
             const prevRatio = prevYearData ? prevYearData.totalCurrentAssets / prevYearData.totalCurrentLiabilities : 0;
             return currentRatio > prevRatio ? 1 : 0;
           },
+          format: formatFScore,
           description: `An improving current ratio (score 1) suggests better short-term liquidity. This is valuable for investors as it indicates the company's enhanced ability to meet short-term obligations, reducing the risk of financial distress and potentially indicating more efficient working capital management.`
         },
         {
@@ -280,6 +293,7 @@ const FinancialHealth = ({ ticker }) => {
           calculate: (data, prevYearData) => {
             return data.sharesOutstanding <= (prevYearData ? prevYearData.sharesOutstanding : data.sharesOutstanding) ? 1 : 0;
           },
+          format: formatFScore,
           description: `No increase in shares outstanding (score 1) suggests the company didn't dilute existing shareholders. For investors, this is positive as it indicates the company can fund its operations and growth without resorting to equity issuance, preserving shareholder value and potentially signaling management's confidence in the company's financial position.`
         },
         {
@@ -289,6 +303,7 @@ const FinancialHealth = ({ ticker }) => {
             const prevGrossMargin = prevYearData ? (prevYearData.revenue - prevYearData.costOfRevenue) / prevYearData.revenue : 0;
             return grossMargin > prevGrossMargin ? 1 : 0;
           },
+          format: formatFScore,
           description: `Improving gross margin (score 1) indicates better operational efficiency or pricing power. This is valuable for investors as it suggests the company's ability to manage costs effectively or command higher prices, which can lead to improved profitability and competitive advantage in the long run.`
         },
         {
@@ -298,6 +313,7 @@ const FinancialHealth = ({ ticker }) => {
             const prevAssetTurnover = prevYearData ? prevYearData.revenue / prevYearData.totalAssets : 0;
             return assetTurnover > prevAssetTurnover ? 1 : 0;
           },
+          format: formatFScore,
           description: `Improving asset turnover (score 1) shows more efficient use of assets to generate sales. For investors, this is important as it indicates the company's ability to generate more revenue from its asset base, potentially leading to better returns on investment and suggesting effective management of resources.`
         }
       ]
