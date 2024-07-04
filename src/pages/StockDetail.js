@@ -9,7 +9,6 @@ import AddNoteModal from '../components/AddNoteModal';
 import TransactionSummary from '../components/TransactionSummary';
 import NotesCard from '../components/NotesCard';
 import CaseComponent from '../components/CaseComponent';
-import FinancialRatiosComponent from '../components/FinancialRatiosComponent';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -80,19 +79,22 @@ const StockDetail = () => {
       <Header title={stock ? stock.name : 'Loading...'} />
       <div className="container mx-auto p-4">
         {stock ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="lg:col-span-3 flex flex-col h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Top Row */}
+            <div className="lg:col-span-3 flex flex-col">
               <CaseComponent
                 ticker={ticker}
                 initialContent={caseContent}
                 onSave={handleCaseSave}
               />
             </div>
-            <div className="lg:col-span-1 flex flex-col h-full">
+            <div className="lg:col-span-1 flex flex-col">
               <TransactionSummary notes={notes} ticker={ticker} />
             </div>
+            
 
-            <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col h-full">
+            {/* Second Row */}
+            <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
               <div className="card-body p-0">
                 <StockChart
                   ticker={ticker}
@@ -102,7 +104,7 @@ const StockDetail = () => {
                 />
               </div>
             </div>
-            <div className="lg:col-span-1 flex flex-col h-full">
+            <div className="lg:col-span-1 flex flex-col space-y-6">
               <NotesCard
                 notes={notes}
                 selectedNote={selectedNote}
@@ -114,16 +116,14 @@ const StockDetail = () => {
               />
             </div>
 
-            <div className="lg:col-span-2 flex flex-col h-full">
+            {/* Third Row */}
+            <div className="lg:col-span-2 flex flex-col">
               <StockInfo ticker={ticker} />
             </div>
-
-            <div className="lg:col-span-2 flex flex-col h-full">
-              <FinancialRatiosComponent ticker={ticker} />
-            </div>
-            <div className="lg:col-span-4 flex flex-col h-full">
+            <div className="lg:col-span-2 flex flex-col">
               <FinancialHealth ticker={ticker} />
             </div>
+
           </div>
         ) : (
           <div className="flex justify-center items-center h-screen">

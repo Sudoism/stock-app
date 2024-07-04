@@ -42,36 +42,8 @@ const FinancialHealth = ({ ticker }) => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   };
 
-  const getRevenue = (data) => {
-    return data.revenuefromcontractwithcustomerexcludingassessedtax || data.revenues;
-  };
-
   const calculateFreeCashFlow = (data) => {
-    const operatingCashFlow = data.netcashprovidedbyusedinoperatingactivities;
-    const capex = data.paymentstoacquirepropertyplantandequipment;
-    if (operatingCashFlow === undefined || capex === undefined) return undefined;
-    return operatingCashFlow - capex;
-  };
-
-  const calculateGrossMargin = (data) => {
-    const revenue = getRevenue(data);
-    const cogs = data.costofgoodsandservicessold || data.costofrevenue;
-    if (revenue === undefined || cogs === undefined) return undefined;
-    return (revenue - cogs) / revenue;
-  };
-
-  const calculateOperatingMargin = (data) => {
-    const operatingIncome = data.operatingincomeloss;
-    const revenue = getRevenue(data);
-    if (operatingIncome === undefined || revenue === undefined) return undefined;
-    return operatingIncome / revenue;
-  };
-
-  const calculateNetProfitMargin = (data) => {
-    const netIncome = data.netincomeloss;
-    const revenue = getRevenue(data);
-    if (netIncome === undefined || revenue === undefined) return undefined;
-    return netIncome / revenue;
+    return data.freeCashFlow;
   };
 
   const financialMetrics = [
@@ -80,49 +52,49 @@ const FinancialHealth = ({ ticker }) => {
       metrics: [
         { 
           label: 'Revenue', 
-          getValue: getRevenue,
+          key: 'revenue',
           description: 'Total amount of money earned from selling goods or services. Look for consistent growth over the years. Sudden changes may indicate new product launches, market expansion, or potential challenges. Compare growth rates to industry averages.' 
         },
         { 
-          label: 'Cost of Goods Sold', 
-          key: ['costofgoodsandservicessold', 'costofrevenue'],
+          label: 'Cost of Revenue', 
+          key: 'costOfRevenue',
           description: 'Direct costs attributable to the production of goods sold. A decreasing trend relative to revenue indicates improving efficiency. However, drastic reductions might signal quality issues. Consider industry norms and company-specific factors.' 
         },
         { 
           label: 'Gross Profit', 
-          key: 'grossprofit', 
+          key: 'grossProfit', 
           description: 'Revenue minus Cost of Goods Sold. Should generally increase with revenue. If gross profit growth outpaces revenue growth, it suggests improving efficiency or pricing power.' 
         },
         { 
           label: 'Gross Margin', 
-          calculate: calculateGrossMargin, 
+          key: 'grossProfitRatio', 
           format: formatPercentage, 
           description: 'Gross Profit as a percentage of Revenue. Higher margins indicate better efficiency in production and pricing power. Look for stability or upward trends. Sudden drops may signal pricing pressures or rising costs. Compare with industry peers as ideal margins vary by sector.' 
         },
         { 
           label: 'Operating Expenses', 
-          key: 'operatingexpenses', 
+          key: 'operatingExpenses', 
           description: 'Expenses incurred in normal business operations. Should grow more slowly than revenue for improving profitability. Rapid increases might indicate expansion efforts or potential inefficiencies. Consider the nature of the business and growth stage.' 
         },
         { 
           label: 'Operating Income', 
-          key: 'operatingincomeloss', 
+          key: 'operatingIncome', 
           description: 'Profit from business operations before interest and taxes. Should grow faster than revenue for improving operational efficiency. Consistent growth indicates strong core business performance.' 
         },
         { 
           label: 'Operating Margin', 
-          calculate: calculateOperatingMargin, 
+          key: 'operatingIncomeRatio', 
           format: formatPercentage, 
           description: 'Operating Income as a percentage of Revenue. Reflects operational efficiency and pricing power. Higher margins are generally better, but compare with industry norms. Increasing margins over time suggest improving operations or scalability.' 
         },
         { 
           label: 'Net Income', 
-          key: 'netincomeloss', 
+          key: 'netIncome', 
           description: 'Company\'s total earnings or profit. Should show consistent growth over time. Volatile or declining net income might indicate business challenges or heavy investments. Consider alongside revenue trends and industry conditions.' 
         },
         { 
           label: 'Net Profit Margin', 
-          calculate: calculateNetProfitMargin, 
+          key: 'netIncomeRatio', 
           format: formatPercentage, 
           description: 'Net Income as a percentage of Revenue. Higher margins indicate better overall profitability. Increasing margins suggest improving efficiency or scalability. Declining margins might signal rising costs or competitive pressures. Compare trends with industry peers.' 
         },
@@ -133,27 +105,27 @@ const FinancialHealth = ({ ticker }) => {
       metrics: [
         { 
           label: 'Current Assets', 
-          key: 'assetscurrent', 
+          key: 'totalCurrentAssets', 
           description: 'Assets expected to be converted to cash within one year. Should generally increase with business growth. A significant decrease might indicate cash flow issues or strategic changes. Compare with current liabilities for liquidity assessment.' 
         },
         { 
           label: 'Total Assets', 
-          key: 'assets', 
+          key: 'totalAssets', 
           description: 'Total of all assets owned by the company. Should grow over time with the business. Rapid increases might indicate acquisitions or major investments. Decreases could signal asset sales or write-downs. Consider alongside revenue and profitability trends.' 
         },
         { 
           label: 'Current Liabilities', 
-          key: 'liabilitiescurrent', 
+          key: 'totalCurrentLiabilities', 
           description: 'Obligations due within one year. Should be manageable relative to current assets. Rapid increases might indicate cash flow challenges or aggressive short-term financing. Compare growth rate to current assets and revenue.' 
         },
         { 
           label: 'Total Liabilities', 
-          key: 'liabilities', 
+          key: 'totalLiabilities', 
           description: 'Total of all liabilities owed by the company. Monitor the growth rate relative to assets and equity. Excessive liability growth might indicate overleveraging. Consider industry norms and companys growth stage.' 
         },
         { 
           label: 'Stockholders\' Equity', 
-          key: 'stockholdersequity', 
+          key: 'totalStockholdersEquity', 
           description: 'Total assets minus total liabilities; represents the book value of the company. Should generally increase over time through retained earnings. Decreases might indicate losses, dividends, or share buybacks. Consider alongside market capitalization for valuation insights.' 
         },
       ]
@@ -163,12 +135,12 @@ const FinancialHealth = ({ ticker }) => {
       metrics: [
         { 
           label: 'Operating Cash Flow', 
-          key: 'netcashprovidedbyusedinoperatingactivities', 
+          key: 'operatingCashFlow', 
           description: 'Cash generated from normal business operations. Should be consistently positive and growing. Negative or declining OCF might indicate profitability issues or working capital challenges. Compare with net income for earnings quality assessment.' 
         },
         { 
           label: 'Capital Expenditures', 
-          key: 'paymentstoacquirepropertyplantandequipment', 
+          key: 'capitalExpenditure', 
           description: 'Funds used to acquire or upgrade physical assets. Reflects investment in future growth. High CapEx might indicate expansion but could pressure short-term cash flows. Evaluate in context of industry and growth strategy.' 
         },
         { 
@@ -186,15 +158,8 @@ const FinancialHealth = ({ ticker }) => {
   };
 
   const getValue = (metric, data) => {
-    if (metric.getValue) {
-      return metric.getValue(data);
-    }
-    if (Array.isArray(metric.key)) {
-      for (let key of metric.key) {
-        if (data[key] !== undefined) {
-          return data[key];
-        }
-      }
+    if (metric.calculate) {
+      return metric.calculate(data);
     }
     return data[metric.key];
   };
@@ -225,15 +190,13 @@ const FinancialHealth = ({ ticker }) => {
                 {section.metrics.map((metric, metricIndex) => (
                   <React.Fragment key={metric.label}>
                     <tr 
-                      className={`hover:bg-base-200 cursor-pointer transition-colors duration-100 ease-in-out ${expandedMetric === `${sectionIndex}-${metricIndex}` ? 'bg-base-200' : ''}`}
+                      className={`hover:bg-base-200 cursor-pointer ${expandedMetric === `${sectionIndex}-${metricIndex}` ? 'bg-base-200' : ''}`}
                       onClick={() => toggleExpand(sectionIndex, metricIndex)}
                     >
                       <td className="w-1/4">{metric.label}</td>
                       {financialData.map((data, index) => (
                         <td key={data.date} className="text-right" style={{width: `${75 / financialData.length}%`}}>
-                          {metric.calculate
-                            ? (metric.format || formatNumber)(metric.calculate(data))
-                            : formatNumber(getValue(metric, data))}
+                          {(metric.format || formatNumber)(getValue(metric, data))}
                         </td>
                       ))}
                     </tr>
