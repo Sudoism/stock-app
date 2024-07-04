@@ -30,6 +30,7 @@ const FinancialHealth = ({ ticker }) => {
 
   const formatNumber = (num) => {
     if (num === undefined || isNaN(num)) return 'N/A';
+  //  if (Number.isInteger(num)) return num.toString(); // For F-Score components
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', compactDisplay: 'short' }).format(num);
   };
 
@@ -45,6 +46,48 @@ const FinancialHealth = ({ ticker }) => {
 
   const calculateFreeCashFlow = (data) => {
     return data.freeCashFlow;
+  };
+
+  const calculatePiotroskiScore = (data, prevYearData) => {
+    let score = 0;
+    
+    // 1. Net Income
+    if (data.netIncome > 0) score++;
+    
+    // 2. Return on Assets (ROA)
+    const currentROA = data.netIncome / data.totalAssets;
+    if (currentROA > 0) score++;
+    
+    // 3. Operating Cash Flow
+    if (data.operatingCashFlow > 0) score++;
+    
+    // 4. Cash Flow from Operations greater than Net Income
+    if (data.operatingCashFlow > data.netIncome) score++;
+    
+    // 5. Long Term Debt ratio decrease
+    const currentDebtRatio = data.totalLiabilities / data.totalAssets;
+    const prevDebtRatio = prevYearData ? prevYearData.totalLiabilities / prevYearData.totalAssets : 0;
+    if (currentDebtRatio < prevDebtRatio) score++;
+    
+    // 6. Current Ratio improvement
+    const currentRatio = data.totalCurrentAssets / data.totalCurrentLiabilities;
+    const prevCurrentRatio = prevYearData ? prevYearData.totalCurrentAssets / prevYearData.totalCurrentLiabilities : 0;
+    if (currentRatio > prevCurrentRatio) score++;
+    
+    // 7. No new shares issued
+    if (data.sharesOutstanding <= (prevYearData ? prevYearData.sharesOutstanding : data.sharesOutstanding)) score++;
+    
+    // 8. Gross Margin improvement
+    const grossMargin = (data.revenue - data.costOfRevenue) / data.revenue;
+    const prevGrossMargin = prevYearData ? (prevYearData.revenue - prevYearData.costOfRevenue) / prevYearData.revenue : 0;
+    if (grossMargin > prevGrossMargin) score++;
+    
+    // 9. Asset Turnover improvement
+    const assetTurnover = data.revenue / data.totalAssets;
+    const prevAssetTurnover = prevYearData ? prevYearData.revenue / prevYearData.totalAssets : 0;
+    if (assetTurnover > prevAssetTurnover) score++;
+
+    return score;
   };
 
   const financialMetrics = [
@@ -185,6 +228,79 @@ const FinancialHealth = ({ ticker }) => {
           description: `Compares the market's valuation of a company to its book value. A lower P/B might indicate undervaluation, but could also suggest fundamental problems. Consider along with ROE and industry standards. Calculation: Market Price per Share / Book Value per Share, where Book Value per Share = Total Shareholders' Equity / Shares Outstanding.`
         }
       ]
+    },
+    {
+      section: "Piotroski F-Score",
+      metrics: [
+        {
+          label: 'Total Piotroski F-Score',
+          calculate: (data, prevYearData) => calculatePiotroskiScore(data, prevYearData),
+          description: `The Piotroski F-Score is a comprehensive measure of a company's financial health, ranging from 0 to 9. A higher score (7-9) indicates stronger financial position and potential for good stock performance. Scores of 0-3 suggest weak financials. This metric is valuable for investors as it combines multiple aspects of financial health into a single, easy-to-interpret number, helping to identify potentially undervalued stocks with improving financials.`
+        },
+        {
+          label: 'Net Income Positivity',
+          calculate: (data) => data.netIncome > 0 ? 1 : 0,
+          description: `Positive net income (score 1) indicates profitability, a fundamental aspect of a healthy company. For investors, consistent profitability suggests the company can sustain operations, reinvest in growth, and potentially provide returns to shareholders.`
+        },
+        {
+          label: 'Return on Assets (ROA) Positivity',
+          calculate: (data) => (data.netIncome / data.totalAssets) > 0 ? 1 : 0,
+          description: `Positive ROA (score 1) shows the company is effectively using its assets to generate profit. This is crucial for investors as it indicates management's efficiency in utilizing the company's resources, which is especially important when comparing companies within the same industry.`
+        },
+        {
+          label: 'Operating Cash Flow Positivity',
+          calculate: (data) => data.operatingCashFlow > 0 ? 1 : 0,
+          description: `Positive operating cash flow (score 1) is vital as it shows the company can generate cash from its core business operations. For investors, this indicates the company's ability to fund its operations without relying on external financing, which is crucial for long-term sustainability.`
+        },
+        {
+          label: 'Cash Flow vs Net Income',
+          calculate: (data) => data.operatingCashFlow > data.netIncome ? 1 : 0,
+          description: `Operating cash flow exceeding net income (score 1) suggests high earnings quality. This is important for investors as it indicates that the company's profitability is backed by actual cash generation, reducing the risk of accounting manipulations and providing a more reliable picture of financial health.`
+        },
+        {
+          label: 'Long Term Debt Ratio Decrease',
+          calculate: (data, prevYearData) => {
+            const currentRatio = data.totalLiabilities / data.totalAssets;
+            const prevRatio = prevYearData ? prevYearData.totalLiabilities / prevYearData.totalAssets : Infinity;
+            return currentRatio < prevRatio ? 1 : 0;
+          },
+          description: `A decrease in long-term debt ratio (score 1) indicates improving financial health. For investors, this suggests reduced financial risk, improved solvency, and potentially more flexibility for the company to invest in growth opportunities or weather economic downturns.`
+        },
+        {
+          label: 'Current Ratio Improvement',
+          calculate: (data, prevYearData) => {
+            const currentRatio = data.totalCurrentAssets / data.totalCurrentLiabilities;
+            const prevRatio = prevYearData ? prevYearData.totalCurrentAssets / prevYearData.totalCurrentLiabilities : 0;
+            return currentRatio > prevRatio ? 1 : 0;
+          },
+          description: `An improving current ratio (score 1) suggests better short-term liquidity. This is valuable for investors as it indicates the company's enhanced ability to meet short-term obligations, reducing the risk of financial distress and potentially indicating more efficient working capital management.`
+        },
+        {
+          label: 'No New Shares Issued',
+          calculate: (data, prevYearData) => {
+            return data.sharesOutstanding <= (prevYearData ? prevYearData.sharesOutstanding : data.sharesOutstanding) ? 1 : 0;
+          },
+          description: `No increase in shares outstanding (score 1) suggests the company didn't dilute existing shareholders. For investors, this is positive as it indicates the company can fund its operations and growth without resorting to equity issuance, preserving shareholder value and potentially signaling management's confidence in the company's financial position.`
+        },
+        {
+          label: 'Gross Margin Improvement',
+          calculate: (data, prevYearData) => {
+            const grossMargin = (data.revenue - data.costOfRevenue) / data.revenue;
+            const prevGrossMargin = prevYearData ? (prevYearData.revenue - prevYearData.costOfRevenue) / prevYearData.revenue : 0;
+            return grossMargin > prevGrossMargin ? 1 : 0;
+          },
+          description: `Improving gross margin (score 1) indicates better operational efficiency or pricing power. This is valuable for investors as it suggests the company's ability to manage costs effectively or command higher prices, which can lead to improved profitability and competitive advantage in the long run.`
+        },
+        {
+          label: 'Asset Turnover Improvement',
+          calculate: (data, prevYearData) => {
+            const assetTurnover = data.revenue / data.totalAssets;
+            const prevAssetTurnover = prevYearData ? prevYearData.revenue / prevYearData.totalAssets : 0;
+            return assetTurnover > prevAssetTurnover ? 1 : 0;
+          },
+          description: `Improving asset turnover (score 1) shows more efficient use of assets to generate sales. For investors, this is important as it indicates the company's ability to generate more revenue from its asset base, potentially leading to better returns on investment and suggesting effective management of resources.`
+        }
+      ]
     }
   ];
 
@@ -203,9 +319,9 @@ const FinancialHealth = ({ ticker }) => {
     }));
   };
 
-  const getValue = (metric, data) => {
+  const getValue = (metric, data, prevYearData) => {
     if (metric.calculate) {
-      return metric.calculate(data);
+      return metric.calculate(data, prevYearData);
     }
     return data[metric.key];
   };
@@ -217,7 +333,7 @@ const FinancialHealth = ({ ticker }) => {
         {financialMetrics.map((section, sectionIndex) => (
           <div key={section.section} className="mb-4">
             <h3 
-              className="font-bold bg-base-100 p-2 cursor-pointer hover:bg-base-200 transition-colors duration-200"
+              className="font-bold bg-base-100 p-2 cursor-pointer hover:bg-base-200"
               onClick={() => toggleSection(sectionIndex)}
             >
               {section.section}
@@ -238,13 +354,13 @@ const FinancialHealth = ({ ticker }) => {
                   {section.metrics.map((metric, metricIndex) => (
                     <React.Fragment key={metric.label}>
                       <tr 
-                        className="hover:bg-base-200 cursor-pointer transition-colors duration-200"
+                        className="hover:bg-base-200 cursor-pointer"
                         onClick={() => toggleMetric(sectionIndex, metricIndex)}
                       >
                         <td className="w-1/4">{metric.label}</td>
                         {financialData.map((data, index) => (
                           <td key={data.date} className="text-right" style={{width: `${75 / financialData.length}%`}}>
-                            {(metric.format || formatNumber)(getValue(metric, data))}
+                            {(metric.format || formatNumber)(getValue(metric, data, financialData[index - 1]))}
                           </td>
                         ))}
                       </tr>
