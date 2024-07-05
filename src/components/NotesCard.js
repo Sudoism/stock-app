@@ -16,17 +16,24 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
   const sortedNotes = [...notes].sort((a, b) => new Date(b.noteDate) - new Date(a.noteDate));
 
   const renderTransactionBadge = (note) => {
-    if (!note.transactionType) return null;
-    const color = note.transactionType === 'buy' ? 'bg-green-500' : 'bg-red-500';
+    const color = note.transactionType === 'buy' ? 'bg-green-500' : note.transactionType === 'sell' ? 'bg-red-500' : 'bg-gray-500';
+    const sign = note.transactionType === 'buy' ? '+' : note.transactionType === 'sell' ? '-' : '';
+    const quantity = note.quantity || 0;
+    
     return (
       <div className={`badge ${color} text-white text-xs ml-2 flex-shrink-0`}>
-        {note.transactionType === 'buy' ? '+' : '-'}{note.quantity}
+        {sign}{quantity}
       </div>
     );
   };
 
   const renderNoteDetails = () => {
     if (!selectedNote) return null;
+
+    const hasTransaction = selectedNote.transactionType && selectedNote.quantity && selectedNote.price;
+    const price = hasTransaction ? parseFloat(selectedNote.price) : null;
+    const quantity = hasTransaction ? selectedNote.quantity : null;
+    const total = hasTransaction ? price * quantity : null;
 
     return (
       <div className="p-2 bg-base-100 rounded">
@@ -35,19 +42,10 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
           {renderTransactionBadge(selectedNote)}
         </div>
         <p className="text-sm mb-4">{selectedNote.content}</p>
-        {selectedNote.transactionType && (
-          <div className="mb-4 text-sm">
-            <p>
-            <strong>{selectedNote.transactionType === 'buy' ? 'Bought' : 'Sold'}</strong>: {selectedNote.quantity}
-            </p>
-            <p>
-            <strong>Quote</strong>: ${parseFloat(selectedNote.price).toFixed(2)}
-            </p>
-            <p>
-            <strong>Total</strong>:{' '}
-              ${(selectedNote.price * selectedNote.quantity).toFixed(2)}
-            </p>
-
+        {hasTransaction && (
+          <div className="text-right">
+            <p className="text-sm text-gray-500">${price.toFixed(2)}</p>
+            <p className="text-xs text-gray-400">{quantity} x ${price.toFixed(2)} = ${total.toFixed(2)}</p>
           </div>
         )}
       </div>
@@ -76,12 +74,17 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
             <ul className="space-y-2">
               {sortedNotes.map((note) => (
                 <li key={note.id} className="cursor-pointer hover:bg-base-200 rounded" onClick={() => setSelectedNote(note)}>
-                  <div className="p-2 flex items-start">
-                    <div className="flex-grow mr-2 min-w-0">
+                  <div className="p-2">
+                    <div className="flex items-start justify-between mb-1">
                       <p className="text-sm text-gray-600">{formatDate(note.noteDate)}</p>
-                      <p className="text-sm truncate">{note.content}</p>
+                      {renderTransactionBadge(note)}
                     </div>
-                    {renderTransactionBadge(note)}
+                    <p className="text-sm truncate mb-1">{note.content}</p>
+                    {note.transactionType && note.price && (
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">${parseFloat(note.price).toFixed(2)}</p>
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}
