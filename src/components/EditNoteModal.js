@@ -82,7 +82,7 @@ const EditNoteModal = ({ isOpen, onRequestClose, note, updateNote }) => {
             <>
               <div className="form-control mb-4">
                 <label className="label">
-                  <span className="label-text">Price</span>
+                  <span className="label-text">Stock Price</span>
                 </label>
                 <input
                   type="number"
