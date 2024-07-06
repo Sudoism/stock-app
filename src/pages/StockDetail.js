@@ -9,6 +9,7 @@ import AddNoteModal from '../components/AddNoteModal';
 import TransactionSummary from '../components/TransactionSummary';
 import NotesCard from '../components/NotesCard';
 import CaseComponent from '../components/CaseComponent';
+import NewsSentiment from '../components/NewsSentiment';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -122,6 +123,11 @@ const StockDetail = () => {
             </div>
             <div className="lg:col-span-2 flex flex-col">
               <FinancialHealth ticker={ticker} />
+            </div>
+
+            {/* forth Row (News Sentiment) */}
+            <div className="lg:col-span-4 flex flex-col">
+              <NewsSentiment ticker={ticker} />
             </div>
 
           </div>

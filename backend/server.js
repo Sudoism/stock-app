@@ -32,11 +32,13 @@ const stockRoutes = require('./routes/stocks');
 const noteRoutes = require('./routes/notes');
 const caseRoutes = require('./routes/cases');
 const financialRatiosRoutes = require('./routes/financialRatios');
+const newsSentimentRoutes = require('./routes/newsSentiment');
 
 app.use('/api/stocks', stockRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/financial-ratios', financialRatiosRoutes);
+app.use('/api/news-sentiment', newsSentimentRoutes);
 
 app.get('/', (req, res) => {
   res.send('Stock App Backend');
