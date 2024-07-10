@@ -9,7 +9,6 @@ const Header = ({ title }) => {
       <div className="flex-none">
         <Link to="/" className="btn btn-ghost normal-case text-xl">
           <FontAwesomeIcon icon={faHome} className="mr-2" />
-          Stock Dashboard
         </Link>
       </div>
       <div className="ml-8 flex-grow text-center">
