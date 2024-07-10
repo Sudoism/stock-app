@@ -24,7 +24,6 @@ const NewsSentiment = ({ ticker }) => {
   }, [ticker]);
 
   const formatDate = (dateString) => {
-    // Parse the date string in the format "20240706T042404"
     const year = dateString.slice(0, 4);
     const month = dateString.slice(4, 6);
     const day = dateString.slice(6, 8);
@@ -34,13 +33,30 @@ const NewsSentiment = ({ ticker }) => {
     return `${year}-${month}-${day} ${hour}:${minute}`;
   };
 
-  const getSentimentBadge = (sentiment) => {
-    let color = 'bg-gray-500';
-    if (sentiment >= 0.35) color = 'bg-green-500';
-    if (sentiment <= -0.35) color = 'bg-red-500';
+  const getSentimentBadge = (sentimentScore) => {
+    let colorClass = '';
+    let label = '';
+
+    if (sentimentScore <= -0.35) {
+      colorClass = 'bg-red-500 text-white';
+      label = 'Bearish';
+    } else if (sentimentScore <= -0.15) {
+      colorClass = 'bg-red-200';
+      label = 'Somewhat-Bearish';
+    } else if (sentimentScore < 0.15) {
+      colorClass = 'bg-gray-400 text-white';
+      label = 'Neutral';
+    } else if (sentimentScore < 0.35) {
+      colorClass = 'bg-green-200';
+      label = 'Somewhat-Bullish';
+    } else {
+      colorClass = 'bg-green-500 text-white';
+      label = 'Bullish';
+    }
+
     return (
-      <span className={`badge ${color} text-white text-xs ml-2`}>
-        {sentiment.toFixed(2)}
+      <span className={`badge ${colorClass} text-xs px-2 py-1 w-32 inline-flex justify-center items-center`}>
+        {label}
       </span>
     );
   };
@@ -63,11 +79,14 @@ const NewsSentiment = ({ ticker }) => {
               className="cursor-pointer hover:bg-base-200 rounded p-2"
               onClick={() => handleItemClick(index)}
             >
-              <div className="flex justify-between items-start">
-                <p className="text-sm font-semibold">{item.title}</p>
-                {getSentimentBadge(item.overall_sentiment_score)}
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                <p className="text-sm font-semibold flex-grow">{item.title}</p>
+                <div className="flex items-center justify-between w-full sm:w-auto">
+                  <p className="text-xs text-gray-500 sm:hidden">{formatDate(item.time_published)}</p>
+                  {getSentimentBadge(item.overall_sentiment_score)}
+                </div>
               </div>
-              <p className="text-xs text-gray-500">{formatDate(item.time_published)}</p>
+              <p className="text-xs text-gray-500 hidden sm:block mt-1">{formatDate(item.time_published)}</p>
               {expandedItem === index && (
                 <div className="mt-2">
                   <p className="text-sm">{item.summary}</p>
@@ -89,4 +108,4 @@ const NewsSentiment = ({ ticker }) => {
   );
 };
 
-export default NewsSentiment;
+export default NewsSentiment; 
