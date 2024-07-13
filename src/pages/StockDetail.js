@@ -10,6 +10,8 @@ import TransactionSummary from '../components/TransactionSummary';
 import NotesCard from '../components/NotesCard';
 import CaseComponent from '../components/CaseComponent';
 import NewsSentiment from '../components/NewsSentiment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBriefcase, faNewspaper, faChartLine, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -18,6 +20,7 @@ const StockDetail = () => {
   const [selectedNote, setSelectedNote] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [caseContent, setCaseContent] = useState('');
+  const [activeDrawer, setActiveDrawer] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,73 +78,145 @@ const StockDetail = () => {
     }
   };
 
+  const toggleDrawer = (drawerName) => {
+    setActiveDrawer(activeDrawer === drawerName ? null : drawerName);
+  };
+
+  const renderDrawerContent = () => {
+    switch (activeDrawer) {
+      case 'case':
+        return (
+          <CaseComponent
+            ticker={ticker}
+            initialContent={caseContent}
+            onSave={handleCaseSave}
+          />
+        );
+      case 'news':
+        return <NewsSentiment ticker={ticker} />;
+      case 'financial':
+        return <FinancialHealth ticker={ticker} />;
+      default:
+        return null;
+    }
+  };
+
+  const getDrawerTitle = () => {
+    switch (activeDrawer) {
+      case 'case':
+        return 'Investment Case';
+      case 'news':
+        return 'News Sentiment';
+      case 'financial':
+        return 'Financial Health';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-200">
       <Header title={stock ? stock.name : 'Loading...'} />
-      <div className="p-2">
-        {stock ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
-            {/* Top Row */}
-            <div className="lg:col-span-3 flex flex-col">
-              <CaseComponent
-                ticker={ticker}
-                initialContent={caseContent}
-                onSave={handleCaseSave}
-              />
-            </div>
-            <div className="lg:col-span-1 flex flex-col">
-              <TransactionSummary notes={notes} ticker={ticker} />
-            </div>
-            
+      <div className="drawer drawer-end">
+        <input 
+          id="stock-drawer" 
+          type="checkbox" 
+          className="drawer-toggle" 
+          checked={activeDrawer !== null} 
+          onChange={() => setActiveDrawer(null)} 
+        />
+        <div className="drawer-content">
+          <div className="p-2 pe-12">
+            {stock ? (
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
+                {/* Top Row */}
+                <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
+                  <div className="card-body p-0">
+                    <StockChart
+                      ticker={ticker}
+                      notes={notes}
+                      selectedNote={selectedNote}
+                      setSelectedNote={setSelectedNote}
+                    />
+                  </div>
+                </div>
 
-            {/* Second Row */}
-            <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
-              <div className="card-body p-0">
-                <StockChart
-                  ticker={ticker}
-                  notes={notes}
-                  selectedNote={selectedNote}
-                  setSelectedNote={setSelectedNote}
-                />
+                <div className="lg:col-span-1 flex flex-col space-y-6">
+                  <NotesCard
+                    notes={notes}
+                    selectedNote={selectedNote}
+                    setSelectedNote={setSelectedNote}
+                    updateNote={updateExistingNote}
+                    deleteNote={deleteExistingNote}
+                    addNote={addNote}
+                    openAddNoteModal={() => setIsAddModalOpen(true)}
+                  />
+                </div>
+                {/* Second Row */}
+                <div className="lg:col-span-3 flex flex-col">
+                  <StockInfo ticker={ticker} />
+                </div>
+                <div className="lg:col-span-1 flex flex-col">
+                  <TransactionSummary notes={notes} ticker={ticker} />
+                </div>
+
+
+
+
+
+                {/* Third Row */}
               </div>
-            </div>
-            <div className="lg:col-span-1 flex flex-col space-y-6">
-              <NotesCard
-                notes={notes}
-                selectedNote={selectedNote}
-                setSelectedNote={setSelectedNote}
-                updateNote={updateExistingNote}
-                deleteNote={deleteExistingNote}
-                addNote={addNote}
-                openAddNoteModal={() => setIsAddModalOpen(true)}
-              />
-            </div>
-
-            {/* Third Row */}
-            <div className="lg:col-span-2 flex flex-col">
-              <StockInfo ticker={ticker} />
-            </div>
-            <div className="lg:col-span-2 flex flex-col">
-              <FinancialHealth ticker={ticker} />
-            </div>
-
-            {/* forth Row (News Sentiment) */}
-            <div className="lg:col-span-4 flex flex-col">
-              <NewsSentiment ticker={ticker} />
-            </div>
-
+            ) : (
+              <div className="flex justify-center items-center h-screen">
+                <p className="text-xl">Loading stock details...</p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="flex justify-center items-center h-screen">
-            <p className="text-xl">Loading stock details...</p>
+        </div>
+        <div className="drawer-side">
+          <label htmlFor="stock-drawer" className="drawer-overlay"></label>
+          <div className="p-4 w-[60rem] min-h-full bg-base-200 text-base-content">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">{getDrawerTitle()}</h2>
+              <button 
+                onClick={() => setActiveDrawer(null)} 
+                className="btn btn-ghost btn-sm"
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            {renderDrawerContent()}
           </div>
-        )}
+        </div>
       </div>
       <AddNoteModal
         isOpen={isAddModalOpen}
         onRequestClose={() => setIsAddModalOpen(false)}
         addNote={addNote}
       />
+      <div className="fixed bottom-4 right-4 flex flex-col space-y-2">
+        <button 
+          onClick={() => toggleDrawer('case')} 
+          className={`btn btn-circle ${activeDrawer === 'case' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          title="Investment Case"
+        >
+          <FontAwesomeIcon icon={faBriefcase} />
+        </button>
+        <button 
+          onClick={() => toggleDrawer('news')} 
+          className={`btn btn-circle ${activeDrawer === 'news' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          title="News Sentiment"
+        >
+          <FontAwesomeIcon icon={faNewspaper} />
+        </button>
+        <button 
+          onClick={() => toggleDrawer('financial')} 
+          className={`btn btn-circle ${activeDrawer === 'financial' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          title="Financial Health"
+        >
+          <FontAwesomeIcon icon={faChartLine} />
+        </button>
+      </div>
     </div>
   );
 };
