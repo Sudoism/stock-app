@@ -242,31 +242,31 @@ const FinancialHealth = ({ ticker }) => {
           label: 'Total Piotroski F-Score',
           calculate: (data, prevYearData) => calculatePiotroskiScore(data, prevYearData),
           format: formatFScore,
-          description: `The Piotroski F-Score is a comprehensive measure of a company's financial health, ranging from 0 to 9. A higher score (7-9) indicates stronger financial position and potential for good stock performance. Scores of 0-3 suggest weak financials. This metric is valuable for investors as it combines multiple aspects of financial health into a single, easy-to-interpret number, helping to identify potentially undervalued stocks with improving financials.`
+          description: `The Piotroski F-Score is a comprehensive measure of a company's financial health, ranging from 0 to 9. It's calculated as the sum of all 9 criteria below, with each criterion scoring either 0 or 1. A higher score (7-9) indicates stronger financial position and potential for good stock performance. Scores of 0-3 suggest weak financials. This metric is valuable for investors as it combines multiple aspects of financial health into a single, easy-to-interpret number, helping to identify potentially undervalued stocks with improving financials.`
         },
         {
           label: 'Net Income Positivity',
           calculate: (data) => data.netIncome > 0 ? 1 : 0,
           format: formatFScore,
-          description: `Positive net income (score 1) indicates profitability, a fundamental aspect of a healthy company. For investors, consistent profitability suggests the company can sustain operations, reinvest in growth, and potentially provide returns to shareholders.`
+          description: `Calculated as: Net Income > 0 (Score 1 if true, 0 if false). Positive net income indicates profitability, a fundamental aspect of a healthy company. For investors, consistent profitability suggests the company can sustain operations, reinvest in growth, and potentially provide returns to shareholders.`
         },
         {
           label: 'Return on Assets (ROA) Positivity',
           calculate: (data) => (data.netIncome / data.totalAssets) > 0 ? 1 : 0,
           format: formatFScore,
-          description: `Positive ROA (score 1) shows the company is effectively using its assets to generate profit. This is crucial for investors as it indicates management's efficiency in utilizing the company's resources, which is especially important when comparing companies within the same industry.`
+          description: `Calculated as: Net Income / Total Assets > 0 (Score 1 if true, 0 if false). Positive ROA shows the company is effectively using its assets to generate profit. This is crucial for investors as it indicates management's efficiency in utilizing the company's resources, which is especially important when comparing companies within the same industry.`
         },
         {
           label: 'Operating Cash Flow Positivity',
           calculate: (data) => data.operatingCashFlow > 0 ? 1 : 0,
           format: formatFScore,
-          description: `Positive operating cash flow (score 1) is vital as it shows the company can generate cash from its core business operations. For investors, this indicates the company's ability to fund its operations without relying on external financing, which is crucial for long-term sustainability.`
+          description: `Calculated as: Operating Cash Flow > 0 (Score 1 if true, 0 if false). Positive operating cash flow is vital as it shows the company can generate cash from its core business operations. For investors, this indicates the company's ability to fund its operations without relying on external financing, which is crucial for long-term sustainability.`
         },
         {
           label: 'Cash Flow vs Net Income',
           calculate: (data) => data.operatingCashFlow > data.netIncome ? 1 : 0,
           format: formatFScore,
-          description: `Operating cash flow exceeding net income (score 1) suggests high earnings quality. This is important for investors as it indicates that the company's profitability is backed by actual cash generation, reducing the risk of accounting manipulations and providing a more reliable picture of financial health.`
+          description: `Calculated as: Operating Cash Flow > Net Income (Score 1 if true, 0 if false). Operating cash flow exceeding net income suggests high earnings quality. This is important for investors as it indicates that the company's profitability is backed by actual cash generation, reducing the risk of accounting manipulations and providing a more reliable picture of financial health.`
         },
         {
           label: 'Long Term Debt Ratio Decrease',
@@ -276,7 +276,7 @@ const FinancialHealth = ({ ticker }) => {
             return currentRatio < prevRatio ? 1 : 0;
           },
           format: formatFScore,
-          description: `A decrease in long-term debt ratio (score 1) indicates improving financial health. For investors, this suggests reduced financial risk, improved solvency, and potentially more flexibility for the company to invest in growth opportunities or weather economic downturns.`
+          description: `Calculated as: (Current Year Total Liabilities / Total Assets) < (Previous Year Total Liabilities / Total Assets) (Score 1 if true, 0 if false). A decrease in long-term debt ratio indicates improving financial health. For investors, this suggests reduced financial risk, improved solvency, and potentially more flexibility for the company to invest in growth opportunities or weather economic downturns.`
         },
         {
           label: 'Current Ratio Improvement',
@@ -286,7 +286,7 @@ const FinancialHealth = ({ ticker }) => {
             return currentRatio > prevRatio ? 1 : 0;
           },
           format: formatFScore,
-          description: `An improving current ratio (score 1) suggests better short-term liquidity. This is valuable for investors as it indicates the company's enhanced ability to meet short-term obligations, reducing the risk of financial distress and potentially indicating more efficient working capital management.`
+          description: `Calculated as: (Current Year Current Assets / Current Liabilities) > (Previous Year Current Assets / Current Liabilities) (Score 1 if true, 0 if false). An improving current ratio suggests better short-term liquidity. This is valuable for investors as it indicates the company's enhanced ability to meet short-term obligations, reducing the risk of financial distress and potentially indicating more efficient working capital management.`
         },
         {
           label: 'No New Shares Issued',
@@ -294,7 +294,7 @@ const FinancialHealth = ({ ticker }) => {
             return data.sharesOutstanding <= (prevYearData ? prevYearData.sharesOutstanding : data.sharesOutstanding) ? 1 : 0;
           },
           format: formatFScore,
-          description: `No increase in shares outstanding (score 1) suggests the company didn't dilute existing shareholders. For investors, this is positive as it indicates the company can fund its operations and growth without resorting to equity issuance, preserving shareholder value and potentially signaling management's confidence in the company's financial position.`
+          description: `Calculated as: Current Year Shares Outstanding ≤ Previous Year Shares Outstanding (Score 1 if true, 0 if false). No increase in shares outstanding suggests the company didn't dilute existing shareholders. For investors, this is positive as it indicates the company can fund its operations and growth without resorting to equity issuance, preserving shareholder value and potentially signaling management's confidence in the company's financial position.`
         },
         {
           label: 'Gross Margin Improvement',
@@ -304,7 +304,7 @@ const FinancialHealth = ({ ticker }) => {
             return grossMargin > prevGrossMargin ? 1 : 0;
           },
           format: formatFScore,
-          description: `Improving gross margin (score 1) indicates better operational efficiency or pricing power. This is valuable for investors as it suggests the company's ability to manage costs effectively or command higher prices, which can lead to improved profitability and competitive advantage in the long run.`
+          description: `Calculated as: Current Year Gross Margin > Previous Year Gross Margin, where Gross Margin = (Revenue - Cost of Revenue) / Revenue (Score 1 if true, 0 if false). Improving gross margin indicates better operational efficiency or pricing power. This is valuable for investors as it suggests the company's ability to manage costs effectively or command higher prices, which can lead to improved profitability and competitive advantage in the long run.`
         },
         {
           label: 'Asset Turnover Improvement',
@@ -314,7 +314,7 @@ const FinancialHealth = ({ ticker }) => {
             return assetTurnover > prevAssetTurnover ? 1 : 0;
           },
           format: formatFScore,
-          description: `Improving asset turnover (score 1) shows more efficient use of assets to generate sales. For investors, this is important as it indicates the company's ability to generate more revenue from its asset base, potentially leading to better returns on investment and suggesting effective management of resources.`
+          description: `Calculated as: Current Year Asset Turnover > Previous Year Asset Turnover, where Asset Turnover = Revenue / Total Assets (Score 1 if true, 0 if false). Improving asset turnover shows more efficient use of assets to generate sales. For investors, this is important as it indicates the company's ability to generate more revenue from its asset base, potentially leading to better returns on investment and suggesting effective management of resources.`
         }
       ]
     }
