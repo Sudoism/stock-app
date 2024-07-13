@@ -4,7 +4,6 @@ import axios from 'axios';
 const TransactionSummary = ({ notes, ticker }) => {
   const [currentPrice, setCurrentPrice] = useState(null);
   const [error, setError] = useState(null);
-  const [expandedField, setExpandedField] = useState(null);
 
   useEffect(() => {
     const fetchLatestPrice = async () => {
@@ -69,63 +68,51 @@ const TransactionSummary = ({ notes, ticker }) => {
   };
 
   const getChangeInValueColor = () => {
-    if (changeInValue > 0) return 'text-green-600';
-    if (changeInValue < 0) return 'text-red-600';
+    if (changeInValue > 0) return 'text-success';
+    if (changeInValue < 0) return 'text-error';
     return '';
   };
 
   const summaryData = [
-    { label: 'Shares Owned', value: Math.floor(totalShares).toString() },
+    { 
+      label: 'Shares Owned', 
+      value: Math.floor(totalShares).toString(),
+      details: null
+    },
     { 
       label: 'Current Holdings Value', 
       value: formatCurrency(currentValue),
-      details: currentPrice ? `${Math.floor(totalShares)} shares × ${formatCurrency(currentPrice)} (latest quote) = ${formatCurrency(currentValue)}` : null
+      details: currentPrice ? `${Math.floor(totalShares)} shares × ${formatCurrency(currentPrice)} (latest quote)` : null
     },
     { 
       label: 'Change in Value', 
       value: formatPercentage(changeInValuePercentage),
       details: `Total Invested: ${formatCurrency(totalInvested)}
-                Current Holdings: ${formatCurrency(currentValue)}
-                Cash from Sold Shares: ${formatCurrency(totalSold)}
-                Total Value: ${formatCurrency(totalValue)}
-                Change: ${formatCurrency(changeInValue)} (${formatPercentage(changeInValuePercentage)})`,
+Current Holdings: ${formatCurrency(currentValue)}
+Cash from Sold Shares: ${formatCurrency(totalSold)}
+Total Value: ${formatCurrency(totalValue)}
+Change: ${formatCurrency(changeInValue)}`,
       valueClass: getChangeInValueColor()
     }
   ];
 
-  const toggleExpand = (index) => {
-    setExpandedField(expandedField === index ? null : index);
-  };
-
   return (
-    <div className="card bg-base-100 shadow-xl overflow-x-auto">
-      <div className="card-body">
-        <h2 className="card-title">Investment Summary for {ticker}</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <table className="table w-full">
-          <tbody>
-            {summaryData.map((item, index) => (
-              <React.Fragment key={index}>
-                <tr 
-                  className={`hover:bg-base-200 cursor-pointer transition-colors duration-100 ease-in-out ${expandedField === index ? 'bg-base-200' : ''}`}
-                  onClick={() => toggleExpand(index)}
-                >
-                  <td className="w-1/2">{item.label}</td>
-                  <td className={`w-1/2 text-right ${item.valueClass || ''}`}>{item.value}</td>
-                </tr>
-                {expandedField === index && item.details && (
-                  <tr className="bg-base-200">
-                    <td colSpan="2" className="text-sm px-4 py-2 whitespace-pre-line">
-                      {item.details}
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+    <>
+      {error && <p className="text-error mb-2">{error}</p>}
+      <div className="stats w-full bg-base-100 shadow-lg">
+        {summaryData.map((item, index) => (
+          <div key={index} className="stat px-4 py-2">
+            <div className="stat-title">{item.label}</div>
+            <div className="flex items-center justify-between">
+              <div className={`stat-value ${item.valueClass || ''} mr-4`}>{item.value}</div>
+              {item.details && (
+                <div className="stat-desc text-base text-right">{item.details}</div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+    </>
   );
 };
 

@@ -140,6 +140,11 @@ const StockDetail = () => {
             {stock ? (
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
                 {/* Top Row */}
+                <div className="lg:col-span-4 flex flex-col">
+                  <TransactionSummary notes={notes} ticker={ticker} />
+                </div>
+                
+                {/* Second Row */}
                 <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
                   <div className="card-body p-0">
                     <StockChart
@@ -161,10 +166,6 @@ const StockDetail = () => {
                     addNote={addNote}
                     openAddNoteModal={() => setIsAddModalOpen(true)}
                   />
-                </div>
-                {/* Second Row */}
-                <div className="lg:col-span-4 flex flex-col">
-                  <TransactionSummary notes={notes} ticker={ticker} />
                 </div>
               </div>
             ) : (
