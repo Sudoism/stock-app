@@ -52,12 +52,25 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
       const width = containerWidth - margin.left - margin.right;
       const height = containerHeight - margin.top - margin.bottom;
 
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const xDomain = d3.extent(data, d => d.date);
+      if (xDomain[1] < today) {
+        xDomain[1] = today;
+      }
+
       const x = d3.scaleTime()
-        .domain(d3.extent(data, d => d.date))
+        .domain(xDomain)
         .range([margin.left, width - margin.right]);
 
+      const minPrice = d3.min(data, d => d.price);
+      const maxPrice = d3.max(data, d => d.price);
+      const yDomainMin = Math.max(0, minPrice - (maxPrice - minPrice) * 0.1);
+      const yDomainMax = maxPrice + (maxPrice - minPrice) * 0.1;
+
       const y = d3.scaleLinear()
-        .domain([d3.min(data, d => d.price) - 50, d3.max(data, d => d.price) + 50])
+        .domain([yDomainMin, yDomainMax])
         .nice()
         .range([height - margin.bottom, margin.top]);
 
@@ -81,6 +94,8 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
         .attr('stroke-width', 1.5)
         .attr('d', line);
 
+      const latestDataPoint = data[data.length - 1];
+
       notes.forEach(note => {
         const dateString = note.noteDate.split('T')[0];
         const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
@@ -88,10 +103,12 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
           console.error('Failed to parse note date:', note.noteDate);
           return;
         }
-        const noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
+
+        let noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
+        
+        // If noteData is not found (e.g., for today's notes), use the latest data point
         if (!noteData) {
-          console.warn('No matching data point found for note date:', note.noteDate);
-          return;
+          noteData = {...latestDataPoint, date: noteDate};
         }
 
         const isSelected = selectedNote && selectedNote.id === note.id;
@@ -100,7 +117,7 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
         if (note.transactionType === 'sell') fillColor = 'rgb(239, 68, 68)';  // red-500
 
         const group = svg.append('g')
-          .attr('transform', `translate(${x(noteData.date)},${y(noteData.price)})`)
+          .attr('transform', `translate(${x(noteDate)},${y(noteData.price)})`)
           .on('click', (event) => {
             event.stopPropagation();
             setSelectedNote(note);
