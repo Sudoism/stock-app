@@ -345,7 +345,7 @@ const FinancialHealth = ({ ticker }) => {
   return (
     <div className="card bg-base-100 shadow-xl overflow-x-auto">
       <div className="card-body">
-        <h2 className="card-title">Financial Statements</h2>
+        <h2 className="card-title">Financials</h2>
         {financialMetrics.map((section, sectionIndex) => (
           <div key={section.section} className="mb-4">
             <h3 

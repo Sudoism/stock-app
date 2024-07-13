@@ -71,7 +71,7 @@ const NewsSentiment = ({ ticker }) => {
   return (
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
-        <h2 className="card-title">News Sentiment</h2>
+        <h2 className="card-title">News</h2>
         <ul className="space-y-2">
           {newsData.sort((a, b) => b.time_published.localeCompare(a.time_published)).map((item, index) => (
             <li 
