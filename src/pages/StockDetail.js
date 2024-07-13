@@ -11,7 +11,7 @@ import NotesCard from '../components/NotesCard';
 import CaseComponent from '../components/CaseComponent';
 import NewsSentiment from '../components/NewsSentiment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faNewspaper, faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcase, faNewspaper, faChartLine, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -20,7 +20,7 @@ const StockDetail = () => {
   const [selectedNote, setSelectedNote] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [caseContent, setCaseContent] = useState('');
-  const [activeDrawer, setActiveDrawer] = useState(null);
+  const [activeDrawers, setActiveDrawers] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,26 +79,49 @@ const StockDetail = () => {
   };
 
   const toggleDrawer = (drawerName) => {
-    setActiveDrawer(activeDrawer === drawerName ? null : drawerName);
+    setActiveDrawers(prevDrawers => {
+      if (prevDrawers.includes(drawerName)) {
+        return prevDrawers.filter(name => name !== drawerName);
+      } else {
+        return [...prevDrawers, drawerName];
+      }
+    });
   };
 
   const renderDrawerContent = () => {
-    switch (activeDrawer) {
-      case 'case':
+    const drawerOrder = ['case', 'info', 'financial', 'news'];
+    return drawerOrder
+      .filter(drawerName => activeDrawers.includes(drawerName))
+      .map((drawerName, index, filteredArray) => {
+        let content;
+        switch (drawerName) {
+          case 'case':
+            content = (
+              <CaseComponent
+                ticker={ticker}
+                initialContent={caseContent}
+                onSave={handleCaseSave}
+              />
+            );
+            break;
+          case 'info':
+            content = <StockInfo ticker={ticker} />;
+            break;
+          case 'news':
+            content = <NewsSentiment ticker={ticker} />;
+            break;
+          case 'financial':
+            content = <FinancialHealth ticker={ticker} />;
+            break;
+          default:
+            return null;
+        }
         return (
-          <CaseComponent
-            ticker={ticker}
-            initialContent={caseContent}
-            onSave={handleCaseSave}
-          />
+          <div key={drawerName} className={`${index < filteredArray.length - 1 ? 'pb-2' : ''}`}>
+            {content}
+          </div>
         );
-      case 'news':
-        return <NewsSentiment ticker={ticker} />;
-      case 'financial':
-        return <FinancialHealth ticker={ticker} />;
-      default:
-        return null;
-    }
+      });
   };
 
   return (
@@ -109,8 +132,8 @@ const StockDetail = () => {
           id="stock-drawer" 
           type="checkbox" 
           className="drawer-toggle" 
-          checked={activeDrawer !== null} 
-          onChange={() => setActiveDrawer(null)} 
+          checked={activeDrawers.length > 0} 
+          onChange={() => setActiveDrawers([])} 
         />
         <div className="drawer-content">
           <div className="p-2 pr-16">
@@ -140,10 +163,7 @@ const StockDetail = () => {
                   />
                 </div>
                 {/* Second Row */}
-                <div className="lg:col-span-3 flex flex-col">
-                  <StockInfo ticker={ticker} />
-                </div>
-                <div className="lg:col-span-1 flex flex-col">
+                <div className="lg:col-span-4 flex flex-col">
                   <TransactionSummary notes={notes} ticker={ticker} />
                 </div>
               </div>
@@ -156,7 +176,7 @@ const StockDetail = () => {
         </div>
         <div className="drawer-side">
           <label htmlFor="stock-drawer" className="drawer-overlay"></label>
-          <div className="p-4 pt-20 pr-20 w-[60rem] min-h-full bg-base-200 text-base-content">
+          <div className="p-4 pt-20 pr-20 w-[60rem] min-h-full bg-base-200 text-base-content overflow-y-auto">
             {renderDrawerContent()}
           </div>
         </div>
@@ -169,24 +189,31 @@ const StockDetail = () => {
       <div className="fixed top-20 right-2 flex flex-col space-y-2 z-50">
         <button 
           onClick={() => toggleDrawer('case')} 
-          className={`btn btn-circle ${activeDrawer === 'case' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          className={`btn btn-circle ${activeDrawers.includes('case') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Investment Case"
         >
           <FontAwesomeIcon icon={faBriefcase} />
         </button>
         <button 
-          onClick={() => toggleDrawer('news')} 
-          className={`btn btn-circle ${activeDrawer === 'news' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="News Sentiment"
+          onClick={() => toggleDrawer('info')} 
+          className={`btn btn-circle ${activeDrawers.includes('info') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          title="Stock Info"
         >
-          <FontAwesomeIcon icon={faNewspaper} />
+          <FontAwesomeIcon icon={faInfoCircle} />
         </button>
         <button 
           onClick={() => toggleDrawer('financial')} 
-          className={`btn btn-circle ${activeDrawer === 'financial' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          className={`btn btn-circle ${activeDrawers.includes('financial') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Financial Health"
         >
           <FontAwesomeIcon icon={faChartLine} />
+        </button>
+        <button 
+          onClick={() => toggleDrawer('news')} 
+          className={`btn btn-circle ${activeDrawers.includes('news') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          title="News Sentiment"
+        >
+          <FontAwesomeIcon icon={faNewspaper} />
         </button>
       </div>
     </div>
