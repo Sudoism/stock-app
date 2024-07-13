@@ -11,7 +11,7 @@ import NotesCard from '../components/NotesCard';
 import CaseComponent from '../components/CaseComponent';
 import NewsSentiment from '../components/NewsSentiment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faNewspaper, faChartLine, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcase, faNewspaper, faChartLine } from '@fortawesome/free-solid-svg-icons';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -101,21 +101,8 @@ const StockDetail = () => {
     }
   };
 
-  const getDrawerTitle = () => {
-    switch (activeDrawer) {
-      case 'case':
-        return 'Investment Case';
-      case 'news':
-        return 'News Sentiment';
-      case 'financial':
-        return 'Financial Health';
-      default:
-        return '';
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-base-200 relative">
       <Header title={stock ? stock.name : 'Loading...'} />
       <div className="drawer drawer-end">
         <input 
@@ -126,7 +113,7 @@ const StockDetail = () => {
           onChange={() => setActiveDrawer(null)} 
         />
         <div className="drawer-content">
-          <div className="p-2 pe-12">
+          <div className="p-2 pr-16">
             {stock ? (
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
                 {/* Top Row */}
@@ -159,12 +146,6 @@ const StockDetail = () => {
                 <div className="lg:col-span-1 flex flex-col">
                   <TransactionSummary notes={notes} ticker={ticker} />
                 </div>
-
-
-
-
-
-                {/* Third Row */}
               </div>
             ) : (
               <div className="flex justify-center items-center h-screen">
@@ -175,16 +156,7 @@ const StockDetail = () => {
         </div>
         <div className="drawer-side">
           <label htmlFor="stock-drawer" className="drawer-overlay"></label>
-          <div className="p-4 w-[60rem] min-h-full bg-base-200 text-base-content">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">{getDrawerTitle()}</h2>
-              <button 
-                onClick={() => setActiveDrawer(null)} 
-                className="btn btn-ghost btn-sm"
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-            </div>
+          <div className="p-4 pt-20 pr-20 w-[60rem] min-h-full bg-base-200 text-base-content">
             {renderDrawerContent()}
           </div>
         </div>
@@ -194,7 +166,7 @@ const StockDetail = () => {
         onRequestClose={() => setIsAddModalOpen(false)}
         addNote={addNote}
       />
-      <div className="fixed bottom-4 right-4 flex flex-col space-y-2">
+      <div className="fixed top-20 right-2 flex flex-col space-y-2 z-50">
         <button 
           onClick={() => toggleDrawer('case')} 
           className={`btn btn-circle ${activeDrawer === 'case' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
