@@ -43,32 +43,34 @@ const StocksOverview = () => {
   return (
     <div className="min-h-screen bg-base-200">
       <Header title="Overview" />
-      <div className="container mx-auto p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="p-2"> {/* 4px padding on left and right */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           {stocks.map(stock => (
-            <StockCard key={stock.id} stock={stock} formatDate={formatDate} />
-          ))}
-        </div>
-        {isModalOpen && (
-          <div className="modal modal-open">
-            <div className="modal-box">
-              <h3 className="font-bold text-lg mb-4">Add New Stock</h3>
-              <AddStockModal
-                onCreate={handleCreateStock}
-                onCancel={() => setIsModalOpen(false)}
-              />
+            <div key={stock.id} className="h-full">
+              <StockCard stock={stock} formatDate={formatDate} />
             </div>
+          ))}
+          <div className="h-full">
+            <button
+              className="card bg-base-100 shadow-xl hover:bg-base-300 transition-colors p-4 w-full h-full flex items-center justify-center"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <FontAwesomeIcon icon={faPlus} className="text-gray-400 text-4xl" />
+            </button>
           </div>
-        )}
-        <div className="flex justify-start items-center mb-6">
-          <button
-            className="card bg-base-100 shadow-xl hover:bg-base-300 transition-colors p-4 mt-4"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <FontAwesomeIcon icon={faPlus} className="text-gray-400" />
-          </button>
         </div>
       </div>
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4">Add New Stock</h3>
+            <AddStockModal
+              onCreate={handleCreateStock}
+              onCancel={() => setIsModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
