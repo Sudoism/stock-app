@@ -37,7 +37,7 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
 
     return (
       <div className="p-2 bg-base-100 rounded">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-1">
           <p className="text-sm text-gray-600">{formatDate(selectedNote.noteDate)}</p>
           {renderTransactionBadge(selectedNote)}
         </div>
