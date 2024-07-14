@@ -125,7 +125,7 @@ const StockDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 relative">
+    <div className="min-h-screen bg-sky-100 relative">
       <Header title={stock ? stock.name : 'Loading...'} />
       <div className="drawer drawer-end">
         <input 

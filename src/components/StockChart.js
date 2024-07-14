@@ -96,6 +96,62 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
 
       const latestDataPoint = data[data.length - 1];
 
+      // Add hover functionality
+      const focus = svg.append('g')
+        .attr('class', 'focus')
+        .style('display', 'none');
+
+      focus.append('circle')
+        .attr('r', 5)
+        .attr('fill', 'steelblue');
+
+      focus.append('rect')
+        .attr('class', 'tooltip')
+        .attr('width', 150)  // Increased width
+        .attr('height', 55)  // Increased height
+        .attr('x', 10)
+        .attr('y', -22)
+        .attr('rx', 4)
+        .attr('ry', 4)
+        .attr('fill', 'white')
+        .attr('stroke', 'steelblue');
+
+      focus.append('text')
+        .attr('class', 'tooltip-date')
+        .attr('x', 18)
+        .attr('y', 0);
+
+      focus.append('text')
+        .attr('class', 'tooltip-price')
+        .attr('x', 18)
+        .attr('y', 20);
+
+      svg.append('rect')
+        .attr('class', 'overlay')
+        .attr('width', width)
+        .attr('height', height)
+        .style('fill', 'none')
+        .style('pointer-events', 'all')
+        .on('mouseover', () => focus.style('display', null))
+        .on('mouseout', () => focus.style('display', 'none'))
+        .on('mousemove', mousemove)
+        .on('click', () => setSelectedNote(null));
+
+      const bisectDate = d3.bisector(d => d.date).left;
+
+      function mousemove(event) {
+        const x0 = x.invert(d3.pointer(event)[0]);
+        const i = bisectDate(data, x0, 1);
+        if (i >= data.length) return; // Exit if we're beyond the data range
+        const d0 = data[i - 1];
+        const d1 = data[i];
+        if (!d0 || !d1) return; // Exit if we don't have valid data points
+        const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+        focus.attr('transform', `translate(${x(d.date)},${y(d.price)})`);
+        focus.select('.tooltip-date').text(`Date: ${d3.timeFormat('%Y-%m-%d')(d.date)}`);
+        focus.select('.tooltip-price').text(`Price: $${d.price.toFixed(2)}`);
+      }
+
       notes.forEach(note => {
         const dateString = note.noteDate.split('T')[0];
         const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
@@ -179,7 +235,7 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
         <h2 className="card-title">{ticker} Stock Chart</h2>
-        <div className="w-full" ref={containerRef} onClick={() => setSelectedNote(null)}>
+        <div className="w-full" ref={containerRef}>
           <svg ref={svgRef} style={{ width: '100%', height: 'auto' }}></svg>
         </div>
       </div>
