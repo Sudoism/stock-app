@@ -107,8 +107,9 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
 
       focus.append('rect')
         .attr('class', 'tooltip')
-        .attr('width', 150)  // Increased width
-        .attr('height', 55)  // Increased height
+        //.attr('width', 150)  // Increased width
+        .attr('width', 105)  // Increased width
+        .attr('height', 52)  // Increased height
         .attr('x', 10)
         .attr('y', -22)
         .attr('rx', 4)
@@ -148,8 +149,10 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
         if (!d0 || !d1) return; // Exit if we don't have valid data points
         const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
         focus.attr('transform', `translate(${x(d.date)},${y(d.price)})`);
-        focus.select('.tooltip-date').text(`Date: ${d3.timeFormat('%Y-%m-%d')(d.date)}`);
-        focus.select('.tooltip-price').text(`Price: $${d.price.toFixed(2)}`);
+        //focus.select('.tooltip-date').text(`Date: ${d3.timeFormat('%Y-%m-%d')(d.date)}`);
+        //focus.select('.tooltip-price').text(`Price: $${d.price.toFixed(2)}`);
+        focus.select('.tooltip-date').text(`${d3.timeFormat('%Y-%m-%d')(d.date)}`);
+        focus.select('.tooltip-price').text(`$${d.price.toFixed(2)}`);
       }
 
       notes.forEach(note => {
