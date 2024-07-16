@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase } from '../api';
 import StockChart from '../components/StockChart';
 import StockInfo from '../components/StockInfo';
-import FinancialHealth from '../components/FinancialHealth';
+import FinancialHealth from '../components/FinancialHealth/FinancialHealth';
 import Header from '../components/Header';
 import AddNoteModal from '../components/AddNoteModal';
 import TransactionSummary from '../components/TransactionSummary';
