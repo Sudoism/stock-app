@@ -19,6 +19,7 @@ app.use(bodyParser.json());
 const Stock = require('./models/stock')(sequelize, DataTypes);
 const Note = require('./models/note')(sequelize, DataTypes);
 const Case = require('./models/case')(sequelize, DataTypes);
+const bullBearCaseRoutes = require('./routes/bullBearCase');
 
 sequelize.sync({alter: true})
   .then(() => {
@@ -39,6 +40,7 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/financial-ratios', financialRatiosRoutes);
 app.use('/api/news-sentiment', newsSentimentRoutes);
+app.use('/api/bull-bear-case', bullBearCaseRoutes);
 
 app.get('/', (req, res) => {
   res.send('Stock App Backend');

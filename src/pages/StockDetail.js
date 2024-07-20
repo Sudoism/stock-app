@@ -11,7 +11,8 @@ import NotesCard from '../components/NotesCard';
 import CaseComponent from '../components/CaseComponent';
 import NewsSentiment from '../components/NewsSentiment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faNewspaper, faChartLine, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcase, faNewspaper, faChartLine, faInfoCircle, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
+import BullBearCase from '../components/BullBearCase';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -89,7 +90,7 @@ const StockDetail = () => {
   };
 
   const renderDrawerContent = () => {
-    const drawerOrder = ['case', 'info', 'financial', 'news'];
+    const drawerOrder = ['case', 'info', 'financial', 'news', 'bullbear']; 
     return drawerOrder
       .filter(drawerName => activeDrawers.includes(drawerName))
       .map((drawerName, index, filteredArray) => {
@@ -112,6 +113,9 @@ const StockDetail = () => {
             break;
           case 'financial':
             content = <FinancialHealth ticker={ticker} />;
+            break;
+          case 'bullbear':
+            content = <BullBearCase ticker={ticker} />;
             break;
           default:
             return null;
@@ -215,6 +219,13 @@ const StockDetail = () => {
           title="News Sentiment"
         >
           <FontAwesomeIcon icon={faNewspaper} />
+        </button>
+        <button 
+          onClick={() => toggleDrawer('bullbear')} 
+          className={`btn btn-circle ${activeDrawers.includes('bullbear') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          title="Bull/Bear Case"
+          >
+          <FontAwesomeIcon icon={faBalanceScale} />
         </button>
       </div>
     </div>
