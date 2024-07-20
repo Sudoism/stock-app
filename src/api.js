@@ -37,15 +37,15 @@ const cachedGet = async (url) => {
   return response;
 };
 
-export const getStocksWithDetails = () => cachedGet(`${API_URL}/stocks/with-details`);
-export const getStocks = () => cachedGet(`${API_URL}/stocks`);
-export const getStock = (ticker) => cachedGet(`${API_URL}/stocks/${ticker}`);
+export const getStocksWithDetails = () => axios.get(`${API_URL}/stocks/with-details`);
+export const getStocks = () => axios.get(`${API_URL}/stocks`);
+export const getStock = (ticker) => axios.get(`${API_URL}/stocks/${ticker}`);
 export const createStock = (data) => axios.post(`${API_URL}/stocks`, data);
 
 export const getNotes = (ticker) => cachedGet(`${API_URL}/notes/${ticker}`);
 export const createNote = (data) => axios.post(`${API_URL}/notes`, data);
 
-export const getCase = (ticker) => cachedGet(`${API_URL}/cases/${ticker}`);
+export const getCase = (ticker) => axios.get(`${API_URL}/cases/${ticker}`);
 export const createOrUpdateCase = (ticker, content) => axios.post(`${API_URL}/cases/${ticker}`, { content });
 
 export const getFinancialRatios = (ticker) => cachedGet(`${API_URL}/financial-ratios/${ticker}`);

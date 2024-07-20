@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase } from '../api';
+import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase, getBullBearCase } from '../api';
 import StockChart from '../components/StockChart';
 import StockInfo from '../components/StockInfo';
 import FinancialHealth from '../components/FinancialHealth/FinancialHealth';
@@ -22,18 +22,21 @@ const StockDetail = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [caseContent, setCaseContent] = useState('');
   const [activeDrawers, setActiveDrawers] = useState([]);
+  const [bullBearData, setBullBearData] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [stockResponse, notesResponse, caseResponse] = await Promise.all([
+        const [stockResponse, notesResponse, caseResponse, bullBearResponse] = await Promise.all([
           getStock(ticker),
           getNotes(ticker),
-          getCase(ticker)
+          getCase(ticker),
+          getBullBearCase(ticker)
         ]);
         setStock(stockResponse.data);
         setNotes(notesResponse.data);
         setCaseContent(caseResponse.data?.content || '');
+        setBullBearData(bullBearResponse.data);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
@@ -115,7 +118,7 @@ const StockDetail = () => {
             content = <FinancialHealth ticker={ticker} />;
             break;
           case 'bullbear':
-            content = <BullBearCase ticker={ticker} />;
+            content = <BullBearCase data={bullBearData} />;
             break;
           default:
             return null;
@@ -224,7 +227,7 @@ const StockDetail = () => {
           onClick={() => toggleDrawer('bullbear')} 
           className={`btn btn-circle ${activeDrawers.includes('bullbear') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Bull/Bear Case"
-          >
+        >
           <FontAwesomeIcon icon={faBalanceScale} />
         </button>
       </div>
