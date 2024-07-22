@@ -51,6 +51,8 @@ export const createOrUpdateCase = (ticker, content) => axios.post(`${API_URL}/ca
 export const getFinancialRatios = (ticker) => cachedGet(`${API_URL}/financial-ratios/${ticker}`);
 export const getNewsSentiment = (ticker) => cachedGet(`${API_URL}/news-sentiment/${ticker}`);
 
+export const getFinancialStatement = (ticker) => cachedGet(`${API_URL}/financial-statement?symbol=${ticker}`)
+
 export const updateNote = (data) => axios.put(`${API_URL}/notes/${data.id}`, data);
 
 export const deleteNote = (id) => axios.delete(`${API_URL}/notes/${id}`);
@@ -58,3 +60,4 @@ export const deleteNote = (id) => axios.delete(`${API_URL}/notes/${id}`);
 export const getBullBearCase = (ticker) => cachedGet(`${API_URL}/bull-bear-case/${ticker}`);
 
 export const getStockInfo = (ticker) => cachedGet(`${API_URL}/stock-details?symbol=${ticker}`)
+

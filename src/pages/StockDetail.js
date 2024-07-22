@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase, getBullBearCase, getNewsSentiment, getFinancialRatios, getStockInfo } from '../api';
+import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase, getBullBearCase, getNewsSentiment, getFinancialStatement, getStockInfo } from '../api';
 import StockChart from '../components/StockChart';
-import StockInfo from '../components/StockInfo';
-import FinancialHealth from '../components/FinancialHealth/FinancialHealth';
 import Header from '../components/Header';
 import AddNoteModal from '../components/AddNoteModal';
 import TransactionSummary from '../components/TransactionSummary';
 import NotesCard from '../components/NotesCard';
-import CaseComponent from '../components/CaseComponent';
-import NewsSentiment from '../components/NewsSentiment';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faNewspaper, faChartLine, faInfoCircle, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
-import BullBearCase from '../components/BullBearCase';
+import Drawer from '../components/Drawer';
 
 const StockDetail = () => {
   const { ticker } = useParams();
@@ -60,13 +54,12 @@ const StockDetail = () => {
   useEffect(() => {
     const fetchFinancialData = async () => {
       try {
-        const response = await getFinancialRatios(ticker);
+        const response = await getFinancialStatement(ticker);
         setFinancialData(response.data);
       } catch (error) {
         console.error('Failed to fetch financial data:', error);
       }
     };
-  
     fetchFinancialData();
   }, [ticker]);
 
@@ -79,7 +72,6 @@ const StockDetail = () => {
         console.error('Failed to fetch stock info:', error);
       }
     };
-  
     fetchStockInfo();
   }, [ticker]);
 
@@ -133,55 +125,6 @@ const StockDetail = () => {
     }
   };
 
-  const toggleDrawer = (drawerName) => {
-    setActiveDrawers(prevDrawers => {
-      if (prevDrawers.includes(drawerName)) {
-        return prevDrawers.filter(name => name !== drawerName);
-      } else {
-        return [...prevDrawers, drawerName];
-      }
-    });
-  };
-
-  const renderDrawerContent = () => {
-    const drawerOrder = ['case', 'info', 'financial', 'news', 'bullbear']; 
-    return drawerOrder
-      .filter(drawerName => activeDrawers.includes(drawerName))
-      .map((drawerName, index, filteredArray) => {
-        let content;
-        switch (drawerName) {
-          case 'case':
-            content = (
-              <CaseComponent
-                ticker={ticker}
-                initialContent={caseContent}
-                onSave={handleCaseSave}
-              />
-            );
-            break;
-          case 'info':
-            content = <StockInfo data={stockInfoData} />;
-            break;
-          case 'news':
-            content = <NewsSentiment data={newsSentimentData} />;
-            break;
-          case 'financial':
-            content = <FinancialHealth data={financialData} />;
-            break;
-          case 'bullbear':
-            content = <BullBearCase data={bullBearData} />;
-            break;
-          default:
-            return null;
-        }
-        return (
-          <div key={drawerName} className={`${index < filteredArray.length - 1 ? 'pb-2' : ''}`}>
-            {content}
-          </div>
-        );
-      });
-  };
-
   return (
     <div className="min-h-screen bg-sky-50 relative">
       <Header title={stock ? stock.name : 'Loading...'} />
@@ -196,36 +139,36 @@ const StockDetail = () => {
         <div className="drawer-content">
           <div className="p-2 pr-16">
             {stock ? (
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
-              {/* Top Row */}
-              <div className="lg:col-span-4 flex flex-col">
-                <TransactionSummary notes={notes} ticker={ticker} />
-              </div>
-              
-              {/* Second Row */}
-              <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
-                <div className="card-body p-0">
-                  <StockChart
-                    ticker={ticker}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
+                {/* Top Row */}
+                <div className="lg:col-span-4 flex flex-col">
+                  <TransactionSummary notes={notes} ticker={ticker} />
+                </div>
+                
+                {/* Second Row */}
+                <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
+                  <div className="card-body p-0">
+                    <StockChart
+                      ticker={ticker}
+                      notes={notes}
+                      selectedNote={selectedNote}
+                      setSelectedNote={setSelectedNote}
+                    />
+                  </div>
+                </div>
+
+                <div className="lg:col-span-1 flex flex-col space-y-6">
+                  <NotesCard
                     notes={notes}
                     selectedNote={selectedNote}
                     setSelectedNote={setSelectedNote}
+                    updateNote={updateExistingNote}
+                    deleteNote={deleteExistingNote}
+                    addNote={addNote}
+                    openAddNoteModal={() => setIsAddModalOpen(true)}
                   />
                 </div>
               </div>
-
-              <div className="lg:col-span-1 flex flex-col space-y-6">
-                <NotesCard
-                  notes={notes}
-                  selectedNote={selectedNote}
-                  setSelectedNote={setSelectedNote}
-                  updateNote={updateExistingNote}
-                  deleteNote={deleteExistingNote}
-                  addNote={addNote}
-                  openAddNoteModal={() => setIsAddModalOpen(true)}
-                />
-              </div>
-            </div>
             ) : (
               <div className="flex justify-center items-center h-screen">
                 <p className="text-xl">Loading stock details...</p>
@@ -233,55 +176,23 @@ const StockDetail = () => {
             )}
           </div>
         </div>
-        <div className="drawer-side">
-          <label htmlFor="stock-drawer" className="drawer-overlay"></label>
-          <div className="p-4 pt-20 pr-20 w-[60rem] min-h-full bg-base-200 text-base-content overflow-y-auto">
-            {renderDrawerContent()}
-          </div>
-        </div>
+        <Drawer 
+          activeDrawers={activeDrawers}
+          setActiveDrawers={setActiveDrawers}
+          ticker={ticker}
+          caseContent={caseContent}
+          handleCaseSave={handleCaseSave}
+          stockInfoData={stockInfoData}
+          newsSentimentData={newsSentimentData}
+          financialData={financialData}
+          bullBearData={bullBearData}
+        />
       </div>
       <AddNoteModal
         isOpen={isAddModalOpen}
         onRequestClose={() => setIsAddModalOpen(false)}
         addNote={addNote}
       />
-      <div className="fixed top-20 right-2 flex flex-col space-y-2 z-50">
-        <button 
-          onClick={() => toggleDrawer('case')} 
-          className={`btn btn-circle ${activeDrawers.includes('case') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="Investment Case"
-        >
-          <FontAwesomeIcon icon={faBriefcase} />
-        </button>
-        <button 
-          onClick={() => toggleDrawer('info')} 
-          className={`btn btn-circle ${activeDrawers.includes('info') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="Stock Info"
-        >
-          <FontAwesomeIcon icon={faInfoCircle} />
-        </button>
-        <button 
-          onClick={() => toggleDrawer('financial')} 
-          className={`btn btn-circle ${activeDrawers.includes('financial') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="Financial Health"
-        >
-          <FontAwesomeIcon icon={faChartLine} />
-        </button>
-        <button 
-          onClick={() => toggleDrawer('news')} 
-          className={`btn btn-circle ${activeDrawers.includes('news') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="News Sentiment"
-        >
-          <FontAwesomeIcon icon={faNewspaper} />
-        </button>
-        <button 
-          onClick={() => toggleDrawer('bullbear')} 
-          className={`btn btn-circle ${activeDrawers.includes('bullbear') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="Bull/Bear Case"
-        >
-          <FontAwesomeIcon icon={faBalanceScale} />
-        </button>
-      </div>
     </div>
   );
 };
