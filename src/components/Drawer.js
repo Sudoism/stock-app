@@ -1,11 +1,14 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBriefcase, faNewspaper, faChartLine, faInfoCircle, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
+import { faReddit } from '@fortawesome/free-brands-svg-icons';
 import CaseComponent from './CaseComponent';
 import StockInfo from './StockInfo';
 import NewsSentiment from './NewsSentiment';
 import FinancialHealth from './FinancialHealth/FinancialHealth';
 import BullBearCase from './BullBearCase';
+import RedditPosts from './RedditPosts';
+
 
 const Drawer = ({ 
   activeDrawers, 
@@ -16,7 +19,8 @@ const Drawer = ({
   stockInfoData, 
   newsSentimentData, 
   financialData, 
-  bullBearData 
+  bullBearData,
+  stockName 
 }) => {
   const toggleDrawer = (drawerName) => {
     setActiveDrawers(prevDrawers => {
@@ -29,7 +33,7 @@ const Drawer = ({
   };
 
   const renderDrawerContent = () => {
-    const drawerOrder = ['case', 'info', 'financial', 'news', 'bullbear']; 
+    const drawerOrder = ['case', 'info', 'financial', 'news', 'bullbear', 'reddit']; 
     return drawerOrder
       .filter(drawerName => activeDrawers.includes(drawerName))
       .map((drawerName, index, filteredArray) => {
@@ -55,6 +59,9 @@ const Drawer = ({
             break;
           case 'bullbear':
             content = <BullBearCase data={bullBearData} />;
+            break;
+          case 'reddit':
+            content = <RedditPosts ticker={ticker} stockName={stockName} />;
             break;
           default:
             return null;
@@ -110,6 +117,13 @@ const Drawer = ({
           title="Bull/Bear Case"
         >
           <FontAwesomeIcon icon={faBalanceScale} />
+        </button>
+        <button 
+          onClick={() => toggleDrawer('reddit')} 
+          className={`btn btn-circle ${activeDrawers.includes('reddit') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+          title="Reddit Posts"
+        >
+          <FontAwesomeIcon icon={faReddit} />
         </button>
       </div>
     </>

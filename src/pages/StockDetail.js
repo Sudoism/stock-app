@@ -182,6 +182,7 @@ const StockDetail = () => {
           ticker={ticker}
           caseContent={caseContent}
           handleCaseSave={handleCaseSave}
+          stockName={stock ? stock.name : ''}
           stockInfoData={stockInfoData}
           newsSentimentData={newsSentimentData}
           financialData={financialData}
