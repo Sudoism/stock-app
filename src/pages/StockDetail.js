@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase, getBullBearCase } from '../api';
+import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase, getBullBearCase, getNewsSentiment, getFinancialRatios, getStockInfo } from '../api';
 import StockChart from '../components/StockChart';
 import StockInfo from '../components/StockInfo';
 import FinancialHealth from '../components/FinancialHealth/FinancialHealth';
@@ -23,25 +23,76 @@ const StockDetail = () => {
   const [caseContent, setCaseContent] = useState('');
   const [activeDrawers, setActiveDrawers] = useState([]);
   const [bullBearData, setBullBearData] = useState(null);
+  const [newsSentimentData, setNewsSentimentData] = useState(null);
+  const [financialData, setFinancialData] = useState(null);
+  const [stockInfoData, setStockInfoData] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [stockResponse, notesResponse, caseResponse, bullBearResponse] = await Promise.all([
+        const [stockResponse, notesResponse, caseResponse] = await Promise.all([
           getStock(ticker),
           getNotes(ticker),
-          getCase(ticker),
-          getBullBearCase(ticker)
+          getCase(ticker)
         ]);
         setStock(stockResponse.data);
         setNotes(notesResponse.data);
         setCaseContent(caseResponse.data?.content || '');
-        setBullBearData(bullBearResponse.data);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
     };
     fetchData();
+  }, [ticker]);
+
+  useEffect(() => {
+    const fetchNewsSentiment = async () => {
+      try {
+        const response = await getNewsSentiment(ticker);
+        setNewsSentimentData(response.data);
+      } catch (error) {
+        console.error('Failed to fetch news sentiment:', error);
+      }
+    };
+    fetchNewsSentiment();
+  }, [ticker]);
+
+  useEffect(() => {
+    const fetchFinancialData = async () => {
+      try {
+        const response = await getFinancialRatios(ticker);
+        setFinancialData(response.data);
+      } catch (error) {
+        console.error('Failed to fetch financial data:', error);
+      }
+    };
+  
+    fetchFinancialData();
+  }, [ticker]);
+
+  useEffect(() => {
+    const fetchStockInfo = async () => {
+      try {
+        const response = await getStockInfo(ticker);
+        setStockInfoData(response.data[0]);
+      } catch (error) {
+        console.error('Failed to fetch stock info:', error);
+      }
+    };
+  
+    fetchStockInfo();
+  }, [ticker]);
+
+  useEffect(() => {
+    const fetchBullBearCase = async () => {
+      try {
+        const response = await getBullBearCase(ticker);
+        setBullBearData(response.data);
+      } catch (error) {
+        console.error('Failed to fetch bull/bear case:', error);
+      }
+    };
+    fetchBullBearCase();
   }, [ticker]);
 
   const addNote = async (note) => {
@@ -109,13 +160,13 @@ const StockDetail = () => {
             );
             break;
           case 'info':
-            content = <StockInfo ticker={ticker} />;
+            content = <StockInfo data={stockInfoData} />;
             break;
           case 'news':
-            content = <NewsSentiment ticker={ticker} />;
+            content = <NewsSentiment data={newsSentimentData} />;
             break;
           case 'financial':
-            content = <FinancialHealth ticker={ticker} />;
+            content = <FinancialHealth data={financialData} />;
             break;
           case 'bullbear':
             content = <BullBearCase data={bullBearData} />;
@@ -145,36 +196,36 @@ const StockDetail = () => {
         <div className="drawer-content">
           <div className="p-2 pr-16">
             {stock ? (
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
-                {/* Top Row */}
-                <div className="lg:col-span-4 flex flex-col">
-                  <TransactionSummary notes={notes} ticker={ticker} />
-                </div>
-                
-                {/* Second Row */}
-                <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
-                  <div className="card-body p-0">
-                    <StockChart
-                      ticker={ticker}
-                      notes={notes}
-                      selectedNote={selectedNote}
-                      setSelectedNote={setSelectedNote}
-                    />
-                  </div>
-                </div>
-
-                <div className="lg:col-span-1 flex flex-col space-y-6">
-                  <NotesCard
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
+              {/* Top Row */}
+              <div className="lg:col-span-4 flex flex-col">
+                <TransactionSummary notes={notes} ticker={ticker} />
+              </div>
+              
+              {/* Second Row */}
+              <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
+                <div className="card-body p-0">
+                  <StockChart
+                    ticker={ticker}
                     notes={notes}
                     selectedNote={selectedNote}
                     setSelectedNote={setSelectedNote}
-                    updateNote={updateExistingNote}
-                    deleteNote={deleteExistingNote}
-                    addNote={addNote}
-                    openAddNoteModal={() => setIsAddModalOpen(true)}
                   />
                 </div>
               </div>
+
+              <div className="lg:col-span-1 flex flex-col space-y-6">
+                <NotesCard
+                  notes={notes}
+                  selectedNote={selectedNote}
+                  setSelectedNote={setSelectedNote}
+                  updateNote={updateExistingNote}
+                  deleteNote={deleteExistingNote}
+                  addNote={addNote}
+                  openAddNoteModal={() => setIsAddModalOpen(true)}
+                />
+              </div>
+            </div>
             ) : (
               <div className="flex justify-center items-center h-screen">
                 <p className="text-xl">Loading stock details...</p>

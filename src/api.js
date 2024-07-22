@@ -56,3 +56,5 @@ export const updateNote = (data) => axios.put(`${API_URL}/notes/${data.id}`, dat
 export const deleteNote = (id) => axios.delete(`${API_URL}/notes/${id}`);
 
 export const getBullBearCase = (ticker) => cachedGet(`${API_URL}/bull-bear-case/${ticker}`);
+
+export const getStockInfo = (ticker) => cachedGet(`${API_URL}/stock-details?symbol=${ticker}`)

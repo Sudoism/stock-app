@@ -1,27 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { getNewsSentiment } from '../api';
+import React, { useState } from 'react';
 
-const NewsSentiment = ({ ticker }) => {
-  const [newsData, setNewsData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const NewsSentiment = ({ data }) => {
   const [expandedItem, setExpandedItem] = useState(null);
 
-  useEffect(() => {
-    const fetchNewsData = async () => {
-      try {
-        const response = await getNewsSentiment(ticker);
-        setNewsData(response.data.feed || []);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching news data:', err);
-        setError('Unable to fetch news data. Please try again later.');
-        setLoading(false);
-      }
-    };
+  if (!data) return <div className="loading loading-lg"></div>;
 
-    fetchNewsData();
-  }, [ticker]);
+  const newsData = data.feed || [];
 
   const formatDate = (dateString) => {
     const year = dateString.slice(0, 4);
@@ -65,17 +49,14 @@ const NewsSentiment = ({ ticker }) => {
     setExpandedItem(expandedItem === index ? null : index);
   };
 
-  if (loading) return <div className="loading loading-lg"></div>;
-  if (error) return <div className="alert alert-error">{error}</div>;
-
   return (
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
         <h2 className="card-title">News</h2>
         <ul className="space-y-2">
           {newsData.sort((a, b) => b.time_published.localeCompare(a.time_published)).map((item, index) => (
-            <li 
-              key={index} 
+            <li
+              key={index}
               className="cursor-pointer hover:bg-base-200 rounded p-2"
               onClick={() => handleItemClick(index)}
             >
@@ -90,10 +71,10 @@ const NewsSentiment = ({ ticker }) => {
               {expandedItem === index && (
                 <div className="mt-2">
                   <p className="text-sm">{item.summary}</p>
-                  <a 
-                    href={item.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-blue-500 hover:underline text-sm mt-2 inline-block"
                   >
                     Read full article
@@ -108,4 +89,4 @@ const NewsSentiment = ({ ticker }) => {
   );
 };
 
-export default NewsSentiment; 
+export default NewsSentiment;

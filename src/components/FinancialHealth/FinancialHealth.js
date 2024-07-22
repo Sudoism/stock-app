@@ -1,34 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { financialMetrics } from './financialMetrics';
 import { formatters, calculators } from './financialUtils';
 
-const FinancialHealth = ({ ticker }) => {
-  const [financialData, setFinancialData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const FinancialHealth = ({ data }) => {
   const [expandedSections, setExpandedSections] = useState({});
   const [expandedMetrics, setExpandedMetrics] = useState({});
 
-  useEffect(() => {
-    const fetchFinancialData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5001/api/financial-statement?symbol=${ticker}`);
-        setFinancialData(response.data.sort((a, b) => new Date(a.date) - new Date(b.date)));
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching financial data:', err);
-        setError('Financial data not available for this stock.');
-        setLoading(false);
-      }
-    };
+  if (!data) return <div className="loading loading-lg"></div>;
+  if (data.length === 0) return <div className="alert alert-info">No financial data available</div>;
 
-    fetchFinancialData();
-  }, [ticker]);
-
-  if (loading) return <div className="loading loading-lg"></div>;
-  if (error) return <div className="alert alert-error">{error}</div>;
-  if (financialData.length === 0) return <div className="alert alert-info">No financial data available</div>;
+  const financialData = data.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const toggleSection = (sectionIndex) => {
     setExpandedSections(prev => ({
