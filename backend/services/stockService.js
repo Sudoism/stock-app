@@ -1,4 +1,5 @@
 const { Stock, Note } = require('../models');
+const financialApiService = require('./financialApiService');
 
 const getAllStocks = async () => {
   return Stock.findAll();
@@ -34,33 +35,56 @@ const getStocksWithDetails = async () => {
     const stocks = await Stock.findAll({
       include: [{
         model: Note,
-        attributes: ['noteDate', 'transactionType', 'quantity'],
+        attributes: ['noteDate', 'transactionType', 'quantity', 'price'],
       }],
       order: [['name', 'ASC']]
     });
 
-    return stocks.map(stock => {
+    const stocksWithDetails = await Promise.all(stocks.map(async (stock) => {
       const latestNote = stock.Notes.reduce((latest, note) => 
         (!latest || new Date(note.noteDate) > new Date(latest.noteDate)) ? note : latest
       , null);
 
-      const sharesOwned = stock.Notes.reduce((total, note) => {
+      let sharesOwned = 0;
+      let totalInvested = 0;
+      let totalSold = 0;
+
+      stock.Notes.forEach(note => {
         if (note.transactionType === 'buy') {
-          return total + note.quantity;
+          sharesOwned += note.quantity;
+          totalInvested += note.quantity * note.price;
         } else if (note.transactionType === 'sell') {
-          return total - note.quantity;
+          sharesOwned -= note.quantity;
+          totalSold += note.quantity * note.price;
         }
-        return total;
-      }, 0);
+      });
+
+      // Fetch current stock price using the new method
+      let currentPrice;
+      try {
+        currentPrice = await financialApiService.getLatestStockPrice(stock.ticker);
+      } catch (error) {
+        console.error(`Error fetching price for ${stock.ticker}:`, error);
+        currentPrice = null;
+      }
+
+      const currentValue = currentPrice ? sharesOwned * currentPrice : null;
+      const totalValue = currentValue !== null ? currentValue + totalSold : null;
+      const changeInValue = totalValue !== null ? totalValue - totalInvested : null;
+      const changeInValuePercentage = (totalInvested !== 0 && changeInValue !== null) ? (changeInValue / totalInvested) * 100 : null;
 
       return {
         id: stock.id,
         name: stock.name,
         ticker: stock.ticker,
         latestNoteDate: latestNote ? latestNote.noteDate : null,
-        sharesOwned: sharesOwned
+        sharesOwned: sharesOwned,
+        changeInValue: changeInValue,
+        changeInValuePercentage: changeInValuePercentage
       };
-    });
+    }));
+
+    return stocksWithDetails;
   } catch (error) {
     console.error('Error in getStocksWithDetails:', error);
     throw error;

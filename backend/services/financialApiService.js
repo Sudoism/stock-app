@@ -212,9 +212,36 @@ const getFinancialRatios = async (symbol) => {
   });
 };
 
+const getLatestStockPrice = async (symbol) => {
+  try {
+    const data = await cachedAxiosGet('http://localhost:5001/api/yahoo-stock-data', {
+      symbol: symbol,
+      period1: Math.floor(Date.now() / 1000) - 864000, // 10 days ago
+      period2: Math.floor(Date.now() / 1000),
+      interval: '1d'
+    });
+
+    const lines = data.split('\n').filter(line => line.trim() !== '');
+    if (lines.length < 2) throw new Error('No data available');
+
+    const lastLine = lines[lines.length - 1];
+    const columns = lastLine.split(',');
+    if (columns.length < 5) throw new Error('Invalid data format');
+
+    const closePrice = parseFloat(columns[4]);
+    if (isNaN(closePrice)) throw new Error('Invalid price data');
+
+    return closePrice;
+  } catch (error) {
+    console.error('Error fetching latest price:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   getYahooStockData,
   getStockDetails,
   getFinancialStatement,
-  getFinancialRatios
+  getFinancialRatios,
+  getLatestStockPrice
 };
