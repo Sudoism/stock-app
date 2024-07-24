@@ -47,5 +47,33 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Update a stock
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedStock = await stockService.updateStock(req.params.id, req.body);
+    if (updatedStock) {
+      res.json(updatedStock);
+    } else {
+      res.status(404).json({ error: 'Stock not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete a stock
+router.delete('/:id', async (req, res) => {
+  try {
+    const result = await stockService.deleteStock(req.params.id);
+    if (result) {
+      res.status(204).end();
+    } else {
+      res.status(404).json({ error: 'Stock not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 module.exports = router;

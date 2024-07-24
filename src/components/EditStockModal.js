@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const AddStockModal = ({ isOpen, onRequestClose, onCreate }) => {
+const EditStockModal = ({ isOpen, onRequestClose, onUpdate, stock }) => {
   const [name, setName] = useState('');
   const [ticker, setTicker] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (stock) {
+      setName(stock.name);
+      setTicker(stock.ticker);
+    }
+  }, [stock]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,11 +22,10 @@ const AddStockModal = ({ isOpen, onRequestClose, onCreate }) => {
     }
 
     try {
-      await onCreate({ name, ticker });
-      setName('');
-      setTicker('');
+      await onUpdate({ ...stock, name, ticker });
+      onRequestClose();
     } catch (err) {
-      setError('Failed to add stock. Please try again.');
+      setError('Failed to update stock. Please try again.');
     }
   };
 
@@ -28,7 +34,7 @@ const AddStockModal = ({ isOpen, onRequestClose, onCreate }) => {
   return (
     <div className="modal modal-open">
       <div className="modal-box">
-        <h3 className="font-bold text-lg mb-4">Add New Stock</h3>
+        <h3 className="font-bold text-lg mb-4">Edit Stock</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="alert alert-error">{error}</div>}
           <div className="form-control">
@@ -56,7 +62,7 @@ const AddStockModal = ({ isOpen, onRequestClose, onCreate }) => {
             />
           </div>
           <div className="modal-action">
-            <button type="submit" className="btn btn-primary">Add Stock</button>
+            <button type="submit" className="btn btn-primary">Update Stock</button>
             <button type="button" onClick={onRequestClose} className="btn">Cancel</button>
           </div>
         </form>
@@ -65,4 +71,4 @@ const AddStockModal = ({ isOpen, onRequestClose, onCreate }) => {
   );
 };
 
-export default AddStockModal;
+export default EditStockModal;

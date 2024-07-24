@@ -41,8 +41,10 @@ export const getStocksWithDetails = () => axios.get(`${API_URL}/stocks/with-deta
 export const getStocks = () => axios.get(`${API_URL}/stocks`);
 export const getStock = (ticker) => axios.get(`${API_URL}/stocks/${ticker}`);
 export const createStock = (data) => axios.post(`${API_URL}/stocks`, data);
+export const updateStock = (id, data) => axios.put(`${API_URL}/stocks/${id}`, data);
+export const deleteStock = (id) => axios.delete(`${API_URL}/stocks/${id}`);
 
-export const getNotes = (ticker) => cachedGet(`${API_URL}/notes/${ticker}`);
+export const getNotes = (ticker) => axios.get(`${API_URL}/notes/${ticker}`);
 export const createNote = (data) => axios.post(`${API_URL}/notes`, data);
 
 export const getCase = (ticker) => axios.get(`${API_URL}/cases/${ticker}`);

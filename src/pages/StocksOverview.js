@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { getStocksWithDetails, createStock } from '../api';
+import React, { useEffect, useState, useCallback } from 'react';
+import { getStocksWithDetails, createStock, updateStock, deleteStock } from '../api';
 import AddStockModal from '../components/AddStockModal';
+import EditStockModal from '../components/EditStockModal';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Header from '../components/Header';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -8,29 +10,61 @@ import StockCard from '../components/StockCard';
 
 const StocksOverview = () => {
   const [stocks, setStocks] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedStock, setSelectedStock] = useState(null);
+
+  const fetchStocks = useCallback(async () => {
+    try {
+      const response = await getStocksWithDetails();
+      setStocks(response.data);
+    } catch (error) {
+      console.error('Failed to fetch stocks data:', error);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getStocksWithDetails();
-        setStocks(response.data);
-      } catch (error) {
-        console.error('Failed to fetch stocks data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
+    fetchStocks();
+  }, [fetchStocks]);
 
   const handleCreateStock = async (stock) => {
     try {
-      const response = await createStock(stock);
-      setStocks([...stocks, response.data]);
-      setIsModalOpen(false);
+      await createStock(stock);
+      await fetchStocks();
+      setIsAddModalOpen(false);
     } catch (error) {
       console.error('Failed to create stock:', error);
-      // You might want to show an error message to the user here
+    }
+  };
+
+  const handleEditStock = (stock) => {
+    setSelectedStock(stock);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateStock = async (updatedStock) => {
+    try {
+      await updateStock(updatedStock.id, updatedStock);
+      await fetchStocks();
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Failed to update stock:', error);
+    }
+  };
+
+  const handleDeleteStock = (id) => {
+    setSelectedStock(stocks.find(stock => stock.id === id));
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteStock = async () => {
+    try {
+      await deleteStock(selectedStock.id);
+      await fetchStocks();
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Failed to delete stock:', error);
     }
   };
 
@@ -48,7 +82,7 @@ const StocksOverview = () => {
     return stockList.sort((a, b) => {
       if (!a.latestNoteDate) return 1;
       if (!b.latestNoteDate) return -1;
-      return new Date(a.latestNoteDate) - new Date(b.latestNoteDate);
+      return new Date(b.latestNoteDate) - new Date(a.latestNoteDate);
     });
   };
 
@@ -65,6 +99,8 @@ const StocksOverview = () => {
               stock={stock} 
               formatDate={formatDate} 
               isToday={stock.latestNoteDate && new Date(stock.latestNoteDate).toDateString() === new Date().toDateString()}
+              onEdit={handleEditStock}
+              onDelete={handleDeleteStock}
             />
           </div>
         ))}
@@ -82,7 +118,7 @@ const StocksOverview = () => {
           <div className="h-full">
             <button
               className="card bg-base-100 shadow-xl hover:bg-base-300 transition-colors p-4 w-full h-full flex items-center justify-center"
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsAddModalOpen(true)}
             >
               <FontAwesomeIcon icon={faPlus} className="text-gray-400 mr-2" />
               <span className="text-gray-600">Add New Stock</span>
@@ -90,16 +126,26 @@ const StocksOverview = () => {
           </div>
         </div>
       </div>
-      {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">Add New Stock</h3>
-            <AddStockModal
-              onCreate={handleCreateStock}
-              onCancel={() => setIsModalOpen(false)}
-            />
-          </div>
-        </div>
+      <AddStockModal
+        isOpen={isAddModalOpen}
+        onRequestClose={() => setIsAddModalOpen(false)}
+        onCreate={handleCreateStock}
+      />
+      {isEditModalOpen && (
+        <EditStockModal
+          isOpen={isEditModalOpen}
+          onRequestClose={() => setIsEditModalOpen(false)}
+          onUpdate={handleUpdateStock}
+          stock={selectedStock}
+        />
+      )}
+      {isDeleteModalOpen && (
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onRequestClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={confirmDeleteStock}
+          itemName={selectedStock?.name}
+        />
       )}
     </div>
   );

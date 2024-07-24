@@ -54,7 +54,7 @@ const RedditPosts = ({ ticker, stockName }) => {
               </div>
               <p className="text-xs text-gray-500 hidden sm:block mt-1">{formatDate(post.created_utc)}</p>
               <p className="text-xs text-gray-500 mt-1">
-                Subreddit: r/{post.subreddit} | 
+                r/{post.subreddit} | 
                 Votes: {post.ups - post.downs} | 
                 Comments: {post.num_comments}
               </p>

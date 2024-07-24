@@ -12,6 +12,23 @@ const createStock = async (stockData) => {
   return Stock.create(stockData);
 };
 
+const updateStock = async (id, stockData) => {
+  const stock = await Stock.findByPk(id);
+  if (stock) {
+    return stock.update(stockData);
+  }
+  return null;
+};
+
+const deleteStock = async (id) => {
+  const stock = await Stock.findByPk(id);
+  if (stock) {
+    await stock.destroy();
+    return true;
+  }
+  return false;
+};
+
 const getStocksWithDetails = async () => {
   try {
     const stocks = await Stock.findAll({
@@ -54,5 +71,7 @@ module.exports = {
   getAllStocks,
   getStockByTicker,
   createStock,
-  getStocksWithDetails
+  getStocksWithDetails,
+  updateStock,
+  deleteStock
 };
