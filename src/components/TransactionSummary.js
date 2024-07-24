@@ -1,46 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 
-const TransactionSummary = ({ notes, ticker }) => {
-  const [currentPrice, setCurrentPrice] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchLatestPrice = async () => {
-      try {
-        const response = await axios.get('http://localhost:5001/api/yahoo-stock-data', {
-          params: {
-            symbol: ticker,
-            period1: Math.floor(Date.now() / 1000) - 864000, // 10 days ago
-            period2: Math.floor(Date.now() / 1000),
-            interval: '1d'
-          }
-        });
-
-        const lines = response.data.split('\n').filter(line => line.trim() !== '');
-        if (lines.length < 2) throw new Error('No data available');
-
-        const lastLine = lines[lines.length - 1];
-        const columns = lastLine.split(',');
-        if (columns.length < 5) throw new Error('Invalid data format');
-
-        const closePrice = parseFloat(columns[4]);
-        if (isNaN(closePrice)) throw new Error('Invalid price data');
-
-        setCurrentPrice(closePrice);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching latest price:', error);
-        setCurrentPrice(null);
-        setError('Failed to fetch latest price');
-      }
-    };
-
-    if (ticker) {
-      fetchLatestPrice();
-    }
-  }, [ticker]);
-
+const TransactionSummary = ({ notes, ticker, latestPrice }) => {
   const { totalShares, totalInvested, totalSold } = notes.reduce((acc, note) => {
     const quantity = Number(note.quantity) || 0;
     const price = Number(note.price) || 0;
@@ -54,7 +14,7 @@ const TransactionSummary = ({ notes, ticker }) => {
     return acc;
   }, { totalShares: 0, totalInvested: 0, totalSold: 0 });
 
-  const currentValue = totalShares * (currentPrice || 0);
+  const currentValue = totalShares * (latestPrice || 0);
   const totalValue = currentValue + totalSold;
   const changeInValue = totalValue - totalInvested;
   const changeInValuePercentage = totalInvested !== 0 ? (changeInValue / totalInvested) * 100 : 0;
@@ -82,7 +42,7 @@ const TransactionSummary = ({ notes, ticker }) => {
     { 
       label: 'Current Holdings Value', 
       value: formatCurrency(currentValue),
-      details: currentPrice ? `${Math.floor(totalShares)} shares × ${formatCurrency(currentPrice)} (latest quote)` : null
+      details: latestPrice ? `${Math.floor(totalShares)} shares × ${formatCurrency(latestPrice)} (latest quote)` : null
     },
     { 
       label: 'Change in Value', 
@@ -96,23 +56,28 @@ Change: ${formatCurrency(changeInValue)}`,
     }
   ];
 
-  return (
-    <>
-      {error && <p className="text-error mb-2">{error}</p>}
-      <div className="stats w-full bg-base-100 shadow-lg">
-        {summaryData.map((item, index) => (
-          <div key={index} className="stat px-4 py-2">
-            <div className="stat-title">{item.label}</div>
-            <div className="flex items-center justify-between">
-              <div className={`stat-value ${item.valueClass || ''} mr-4`}>{item.value}</div>
-              {item.details && (
-                <div className="stat-desc text-base text-right">{item.details}</div>
-              )}
-            </div>
-          </div>
-        ))}
+  if (latestPrice === null) {
+    return (
+      <div className="w-full bg-base-100 shadow-lg animate-pulse">
+        <div className="h-32"></div>
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="stats w-full bg-base-100 shadow-lg">
+      {summaryData.map((item, index) => (
+        <div key={index} className="stat px-4 py-2">
+          <div className="stat-title">{item.label}</div>
+          <div className="flex items-center justify-between">
+            <div className={`stat-value ${item.valueClass || ''} mr-4`}>{item.value}</div>
+            {item.details && (
+              <div className="stat-desc text-base text-right">{item.details}</div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 

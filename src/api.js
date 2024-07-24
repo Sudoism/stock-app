@@ -63,6 +63,8 @@ export const getBullBearCase = (ticker) => cachedGet(`${API_URL}/bull-bear-case/
 
 export const getStockInfo = (ticker) => cachedGet(`${API_URL}/stock-details?symbol=${ticker}`)
 
+export const getLatestStockPrice = (symbol) => axios.get(`${API_URL}/latest-stock-price/${symbol}`);
+
 export const getRedditPosts = (ticker, stockName) => 
   axios.get(`https://www.reddit.com/search.json`, {
     params: {

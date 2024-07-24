@@ -79,6 +79,18 @@ app.get('/api/financial-statement', async (req, res) => {
   }
 });
 
+// New endpoint for getting the latest stock price
+app.get('/api/latest-stock-price/:symbol', async (req, res) => {
+  try {
+    const { symbol } = req.params;
+    const latestPrice = await financialApiService.getLatestStockPrice(symbol);
+    res.json({ price: latestPrice });
+  } catch (error) {
+    console.error('Error fetching latest stock price:', error);
+    res.status(500).json({ error: 'Failed to fetch latest stock price' });
+  }
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

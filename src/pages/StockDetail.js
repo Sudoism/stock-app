@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStock, getNotes, createNote, updateNote, deleteNote, getCase, createOrUpdateCase, getBullBearCase, getNewsSentiment, getFinancialStatement, getStockInfo } from '../api';
+import { 
+  getStock, 
+  getNotes, 
+  createNote, 
+  updateNote, 
+  deleteNote, 
+  getCase, 
+  createOrUpdateCase, 
+  getBullBearCase, 
+  getNewsSentiment, 
+  getFinancialStatement, 
+  getStockInfo, 
+  getLatestStockPrice 
+} from '../api';
 import StockChart from '../components/StockChart';
 import Header from '../components/Header';
 import AddNoteModal from '../components/AddNoteModal';
@@ -20,9 +33,19 @@ const StockDetail = () => {
   const [newsSentimentData, setNewsSentimentData] = useState(null);
   const [financialData, setFinancialData] = useState(null);
   const [stockInfoData, setStockInfoData] = useState(null);
+  const [latestPrice, setLatestPrice] = useState(null);
+
+  // Loading states
+  const [isStockLoading, setIsStockLoading] = useState(true);
+  const [isNotesLoading, setIsNotesLoading] = useState(true);
+  const [isCaseLoading, setIsCaseLoading] = useState(true);
+  const [isPriceLoading, setIsPriceLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMainData = async () => {
+      setIsStockLoading(true);
+      setIsNotesLoading(true);
+      setIsCaseLoading(true);
       try {
         const [stockResponse, notesResponse, caseResponse] = await Promise.all([
           getStock(ticker),
@@ -33,58 +56,49 @@ const StockDetail = () => {
         setNotes(notesResponse.data);
         setCaseContent(caseResponse.data?.content || '');
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error('Failed to fetch main data:', error);
+      } finally {
+        setIsStockLoading(false);
+        setIsNotesLoading(false);
+        setIsCaseLoading(false);
       }
     };
-    fetchData();
+    fetchMainData();
   }, [ticker]);
 
   useEffect(() => {
-    const fetchNewsSentiment = async () => {
+    const fetchLatestPrice = async () => {
+      setIsPriceLoading(true);
       try {
-        const response = await getNewsSentiment(ticker);
-        setNewsSentimentData(response.data);
+        const response = await getLatestStockPrice(ticker);
+        setLatestPrice(response.data.price);
       } catch (error) {
-        console.error('Failed to fetch news sentiment:', error);
+        console.error('Failed to fetch latest price:', error);
+      } finally {
+        setIsPriceLoading(false);
       }
     };
-    fetchNewsSentiment();
+    fetchLatestPrice();
   }, [ticker]);
 
   useEffect(() => {
-    const fetchFinancialData = async () => {
+    const fetchAdditionalData = async () => {
       try {
-        const response = await getFinancialStatement(ticker);
-        setFinancialData(response.data);
+        const [newsSentiment, financialStatement, stockInfo, bullBearCase] = await Promise.all([
+          getNewsSentiment(ticker),
+          getFinancialStatement(ticker),
+          getStockInfo(ticker),
+          getBullBearCase(ticker)
+        ]);
+        setNewsSentimentData(newsSentiment.data);
+        setFinancialData(financialStatement.data);
+        setStockInfoData(stockInfo.data[0]);
+        setBullBearData(bullBearCase.data);
       } catch (error) {
-        console.error('Failed to fetch financial data:', error);
+        console.error('Failed to fetch additional data:', error);
       }
     };
-    fetchFinancialData();
-  }, [ticker]);
-
-  useEffect(() => {
-    const fetchStockInfo = async () => {
-      try {
-        const response = await getStockInfo(ticker);
-        setStockInfoData(response.data[0]);
-      } catch (error) {
-        console.error('Failed to fetch stock info:', error);
-      }
-    };
-    fetchStockInfo();
-  }, [ticker]);
-
-  useEffect(() => {
-    const fetchBullBearCase = async () => {
-      try {
-        const response = await getBullBearCase(ticker);
-        setBullBearData(response.data);
-      } catch (error) {
-        console.error('Failed to fetch bull/bear case:', error);
-      }
-    };
-    fetchBullBearCase();
+    fetchAdditionalData();
   }, [ticker]);
 
   const addNote = async (note) => {
@@ -125,6 +139,8 @@ const StockDetail = () => {
     }
   };
 
+  const isLoading = isStockLoading || isNotesLoading || isCaseLoading || isPriceLoading;
+
   return (
     <div className="min-h-screen bg-white relative">
       <Header title={stock ? stock.name : 'Loading...'} />
@@ -138,11 +154,15 @@ const StockDetail = () => {
         />
         <div className="drawer-content">
           <div className="p-2 pr-16">
-            {stock ? (
+            {isLoading ? (
+              <div className="flex justify-center items-center h-screen">
+                <p className="text-xl">Loading stock details...</p>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
                 {/* Top Row */}
                 <div className="lg:col-span-4 flex flex-col">
-                  <TransactionSummary notes={notes} ticker={ticker} />
+                  <TransactionSummary notes={notes} ticker={ticker} latestPrice={latestPrice} />
                 </div>
                 
                 {/* Second Row */}
@@ -168,10 +188,6 @@ const StockDetail = () => {
                     openAddNoteModal={() => setIsAddModalOpen(true)}
                   />
                 </div>
-              </div>
-            ) : (
-              <div className="flex justify-center items-center h-screen">
-                <p className="text-xl">Loading stock details...</p>
               </div>
             )}
           </div>
