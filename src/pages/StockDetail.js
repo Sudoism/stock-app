@@ -126,7 +126,7 @@ const StockDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-sky-50 relative">
+    <div className="min-h-screen bg-white relative">
       <Header title={stock ? stock.name : 'Loading...'} />
       <div className="drawer drawer-end">
         <input 
@@ -146,7 +146,7 @@ const StockDetail = () => {
                 </div>
                 
                 {/* Second Row */}
-                <div className="lg:col-span-3 card bg-base-100 shadow-xl flex flex-col">
+                <div className="lg:col-span-3 card bg-base-100 flex flex-col">
                   <div className="card-body p-0">
                     <StockChart
                       ticker={ticker}

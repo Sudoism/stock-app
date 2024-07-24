@@ -73,7 +73,7 @@ const StocksOverview = () => {
   );
 
   return (
-    <div className="min-h-screen bg-sky-50">
+    <div className="min-h-screen bg-white">
       <Header title="Overview" />
       <div className="p-2">
         {ownedStocks.length > 0 && renderStockGrid(ownedStocks, "Owned Stocks")}

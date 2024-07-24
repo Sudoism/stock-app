@@ -64,7 +64,7 @@ export const getStockInfo = (ticker) => cachedGet(`${API_URL}/stock-details?symb
 export const getRedditPosts = (ticker, stockName) => 
   axios.get(`https://www.reddit.com/search.json`, {
     params: {
-      q: `${ticker} ${stockName}`,
+      q: `${stockName}`,
       sort: 'top',
       t: 'month',
       limit: 15
