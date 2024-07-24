@@ -10,17 +10,21 @@ import StockCard from '../components/StockCard';
 
 const StocksOverview = () => {
   const [stocks, setStocks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
 
   const fetchStocks = useCallback(async () => {
+    setIsLoading(true);
     try {
       const response = await getStocksWithDetails();
       setStocks(response.data);
     } catch (error) {
       console.error('Failed to fetch stocks data:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -87,7 +91,8 @@ const StocksOverview = () => {
   };
 
   const ownedStocks = sortStocks(stocks.filter(stock => stock.sharesOwned > 0));
-  const watchlistStocks = sortStocks(stocks.filter(stock => stock.sharesOwned === 0));
+  const watchlistStocks = sortStocks(stocks.filter(stock => stock.sharesOwned === 0 && (stock.changeInValue === null || stock.changeInValue === 0)));
+  const exitedStocks = sortStocks(stocks.filter(stock => stock.sharesOwned === 0 && stock.changeInValue !== null && stock.changeInValue !== 0));
 
   const renderStockGrid = (stockList, title) => (
     <div className="mb-8">
@@ -112,19 +117,22 @@ const StocksOverview = () => {
     <div className="min-h-screen bg-white">
       <Header title="Overview" />
       <div className="p-2">
-        {ownedStocks.length > 0 && renderStockGrid(ownedStocks, "Owned Stocks")}
+        {ownedStocks.length > 0 && renderStockGrid(ownedStocks, "Owned")}
         {watchlistStocks.length > 0 && renderStockGrid(watchlistStocks, "Watchlist")}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-          <div className="h-full">
-            <button
-              className="card bg-base-100 shadow-xl hover:bg-base-300 transition-colors p-4 w-full h-full flex items-center justify-center"
-              onClick={() => setIsAddModalOpen(true)}
-            >
-              <FontAwesomeIcon icon={faPlus} className="text-gray-400 mr-2" />
-              <span className="text-gray-600">Add New Stock</span>
-            </button>
+        {exitedStocks.length > 0 && renderStockGrid(exitedStocks, "Exits")}
+        {!isLoading && (
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <div className="h-full">
+              <button
+                className="card bg-base-100 shadow-xl hover:bg-base-300 transition-colors p-4 w-full h-full flex items-center justify-center"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                <FontAwesomeIcon icon={faPlus} className="text-gray-400 mr-2" />
+                <span className="text-gray-600">Add New Stock</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <AddStockModal
         isOpen={isAddModalOpen}
