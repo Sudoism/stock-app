@@ -27,13 +27,8 @@ const StockCard = ({ stock, formatDate, isToday, onEdit, onDelete }) => {
             <p className="text-sm text-gray-600">{stock.ticker}</p>
           </div>
           <div className="text-right">
-            {stock.changeInValue !== null && stock.changeInValue !== 0 && (
-              <p className={`font-bold ${getChangeColor(stock.changeInValue)}`}>
-                {formatCurrency(stock.changeInValue)}
-              </p>
-            )}
             {stock.changeInValuePercentage !== null && stock.changeInValuePercentage !== 0 && (
-              <p className={`text-sm ${getChangeColor(stock.changeInValuePercentage)}`}>
+              <p className={` font-bold ${getChangeColor(stock.changeInValuePercentage)}`}>
                 <FontAwesomeIcon 
                   icon={stock.changeInValuePercentage > 0 ? faArrowUp : faArrowDown} 
                   className="mr-1"
@@ -41,6 +36,12 @@ const StockCard = ({ stock, formatDate, isToday, onEdit, onDelete }) => {
                 {formatPercentage(stock.changeInValuePercentage)}
               </p>
             )}
+            {stock.changeInValue !== null && stock.changeInValue !== 0 && (
+              <p className={`text-sm ${getChangeColor(stock.changeInValue)}`}>
+                {formatCurrency(stock.changeInValue)}
+              </p>
+            )}
+            
           </div>
         </div>
         <div className="mt-2 space-y-1">

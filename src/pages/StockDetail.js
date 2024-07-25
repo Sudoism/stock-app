@@ -84,7 +84,7 @@ const StockDetail = () => {
   useEffect(() => {
     const fetchAdditionalData = async () => {
       try {
-        const [newsSentiment, financialStatement, stockInfo, bullBearCase] = await Promise.all([
+        const [newsSentiment, financialStatement, stockInfo] = await Promise.all([
           getNewsSentiment(ticker),
           getFinancialStatement(ticker),
           getStockInfo(ticker),
@@ -93,12 +93,23 @@ const StockDetail = () => {
         setNewsSentimentData(newsSentiment.data);
         setFinancialData(financialStatement.data);
         setStockInfoData(stockInfo.data[0]);
-        setBullBearData(bullBearCase.data);
       } catch (error) {
         console.error('Failed to fetch additional data:', error);
       }
     };
     fetchAdditionalData();
+  }, [ticker]);
+
+  useEffect(() => {
+    const fetchBullBearCase = async () => {
+      try {
+        const bullBearCase = await getBullBearCase(ticker);
+        setBullBearData(bullBearCase.data);
+      } catch (error) {
+        console.error('Failed to fetch bull/bear data:', error);
+      }
+    };
+    fetchBullBearCase();
   }, [ticker]);
 
   const addNote = async (note) => {
