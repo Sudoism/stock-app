@@ -191,15 +191,13 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
           .attr('stroke-width', isSelected ? 2 : 0);
 
         // Text (quantity)
-        if (note.transactionType && note.quantity) {
-          group.append('text')
-            .attr('text-anchor', 'middle')
-            .attr('dy', '.3em')
-            .attr('fill', 'white')
-            .style('font-size', isSelected ? '18px' : '10px')
-            .style('pointer-events', 'none')
-            .text(note.quantity);
-        }
+        group.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '.3em')
+        .attr('fill', 'white')
+        .style('font-size', isSelected ? '18px' : '10px')
+        .style('pointer-events', 'none')
+        .text(note.transactionType ? note.quantity : '0');
 
         // Tooltip
         let tooltipContent = `Note: ${note.content}`;
