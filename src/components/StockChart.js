@@ -1,37 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
 import * as d3 from 'd3';
 
-function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
+function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData }) {
   const [data, setData] = useState([]);
   const svgRef = useRef(null);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const fetchStockData = async () => {
-      try {
-        const response = await axios.get('http://localhost:5001/api/yahoo-stock-data', {
-          params: {
-            symbol: ticker,
-            period1: Math.floor(new Date('2022-01-01').getTime() / 1000),
-            period2: Math.floor(new Date().getTime() / 1000),
-            interval: '1d'
-          }
-        });
+    if (!chartData) return;
 
-        const parsedData = d3.csvParse(response.data);
-        parsedData.forEach(d => {
-          d.date = d3.timeParse("%Y-%m-%d")(d.Date);
-          d.price = +d['Close'];
-        });
-        setData(parsedData);
-      } catch (error) {
-        console.error('Error fetching stock data:', error);
-      }
-    };
-
-    fetchStockData();
-  }, [ticker]);
+    const parsedData = d3.csvParse(chartData);
+    parsedData.forEach(d => {
+      d.date = d3.timeParse("%Y-%m-%d")(d.Date);
+      d.price = +d['Close'];
+    });
+    setData(parsedData);
+  }, [chartData]);
 
   useEffect(() => {
     if (data.length === 0) return;
@@ -107,9 +91,8 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
 
       focus.append('rect')
         .attr('class', 'tooltip')
-        //.attr('width', 150)  // Increased width
-        .attr('width', 105)  // Increased width
-        .attr('height', 52)  // Increased height
+        .attr('width', 105)
+        .attr('height', 52)
         .attr('x', 10)
         .attr('y', -22)
         .attr('rx', 4)
@@ -143,14 +126,12 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
       function mousemove(event) {
         const x0 = x.invert(d3.pointer(event)[0]);
         const i = bisectDate(data, x0, 1);
-        if (i >= data.length) return; // Exit if we're beyond the data range
+        if (i >= data.length) return;
         const d0 = data[i - 1];
         const d1 = data[i];
-        if (!d0 || !d1) return; // Exit if we don't have valid data points
+        if (!d0 || !d1) return;
         const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
         focus.attr('transform', `translate(${x(d.date)},${y(d.price)})`);
-        //focus.select('.tooltip-date').text(`Date: ${d3.timeFormat('%Y-%m-%d')(d.date)}`);
-        //focus.select('.tooltip-price').text(`Price: $${d.price.toFixed(2)}`);
         focus.select('.tooltip-date').text(`${d3.timeFormat('%Y-%m-%d')(d.date)}`);
         focus.select('.tooltip-price').text(`$${d.price.toFixed(2)}`);
       }
@@ -165,15 +146,14 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
 
         let noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
         
-        // If noteData is not found (e.g., for today's notes), use the latest data point
         if (!noteData) {
           noteData = {...latestDataPoint, date: noteDate};
         }
 
         const isSelected = selectedNote && selectedNote.id === note.id;
-        let fillColor = 'gray';  // Default color for notes without transactions
-        if (note.transactionType === 'buy') fillColor = 'rgb(34, 197, 94)';  // green-500
-        if (note.transactionType === 'sell') fillColor = 'rgb(239, 68, 68)';  // red-500
+        let fillColor = 'gray';
+        if (note.transactionType === 'buy') fillColor = 'rgb(34, 197, 94)';
+        if (note.transactionType === 'sell') fillColor = 'rgb(239, 68, 68)';
 
         const group = svg.append('g')
           .attr('transform', `translate(${x(noteDate)},${y(noteData.price)})`)
@@ -183,23 +163,20 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote }) {
           })
           .style('cursor', 'pointer');
 
-        // Circle
         group.append('circle')
           .attr('r', isSelected ? 18 : 10)
           .attr('fill', fillColor)
           .attr('stroke', isSelected ? 'white' : 'none')
           .attr('stroke-width', isSelected ? 2 : 0);
 
-        // Text (quantity)
         group.append('text')
-        .attr('text-anchor', 'middle')
-        .attr('dy', '.3em')
-        .attr('fill', 'white')
-        .style('font-size', isSelected ? '18px' : '10px')
-        .style('pointer-events', 'none')
-        .text(note.transactionType ? note.quantity : '0');
+          .attr('text-anchor', 'middle')
+          .attr('dy', '.3em')
+          .attr('fill', 'white')
+          .style('font-size', isSelected ? '18px' : '10px')
+          .style('pointer-events', 'none')
+          .text(note.transactionType ? note.quantity : '0');
 
-        // Tooltip
         let tooltipContent = `Note: ${note.content}`;
         if (note.transactionType) {
           const price = parseFloat(note.price);

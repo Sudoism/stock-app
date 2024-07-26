@@ -75,3 +75,7 @@ export const getRedditPosts = (ticker, stockName) =>
     }
   });
 
+  export const getYahooStockData = (symbol, period1, period2, interval) => 
+  axios.get(`${API_URL}/yahoo-stock-data`, {
+    params: { symbol, period1, period2, interval }
+  });
