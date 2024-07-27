@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faNewspaper, faChartLine, faInfoCircle, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
+import { faFolder, faNewspaper } from '@fortawesome/free-regular-svg-icons';
+import { faInfoCircle, faChartBar, faBalanceScale } from '@fortawesome/free-solid-svg-icons';
 import { faReddit } from '@fortawesome/free-brands-svg-icons';
 import CaseComponent from './CaseComponent';
 import StockInfo from './StockInfo';
@@ -8,7 +9,6 @@ import NewsSentiment from './NewsSentiment';
 import FinancialHealth from './FinancialHealth/FinancialHealth';
 import BullBearCase from './BullBearCase';
 import RedditPosts from './RedditPosts';
-
 
 const Drawer = ({ 
   activeDrawers, 
@@ -88,42 +88,42 @@ const Drawer = ({
           className={`btn btn-circle ${activeDrawers.includes('case') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Investment Case"
         >
-          <FontAwesomeIcon icon={faBriefcase} />
+          <FontAwesomeIcon icon={faFolder} size="2x" />
         </button>
         <button 
           onClick={() => toggleDrawer('info')} 
           className={`btn btn-circle ${activeDrawers.includes('info') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Stock Info"
         >
-          <FontAwesomeIcon icon={faInfoCircle} />
+          <FontAwesomeIcon icon={faInfoCircle} size="2x" />
         </button>
         <button 
           onClick={() => toggleDrawer('financial')} 
           className={`btn btn-circle ${activeDrawers.includes('financial') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Financial Health"
         >
-          <FontAwesomeIcon icon={faChartLine} />
+          <FontAwesomeIcon icon={faChartBar} size="2x" />
         </button>
         <button 
           onClick={() => toggleDrawer('news')} 
           className={`btn btn-circle ${activeDrawers.includes('news') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="News Sentiment"
         >
-          <FontAwesomeIcon icon={faNewspaper} />
+          <FontAwesomeIcon icon={faNewspaper} size="2x" />
         </button>
         <button 
           onClick={() => toggleDrawer('bullbear')} 
           className={`btn btn-circle ${activeDrawers.includes('bullbear') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Bull/Bear Case"
         >
-          <FontAwesomeIcon icon={faBalanceScale} />
+          <FontAwesomeIcon icon={faBalanceScale} size="2x" />
         </button>
         <button 
           onClick={() => toggleDrawer('reddit')} 
           className={`btn btn-circle ${activeDrawers.includes('reddit') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
           title="Reddit Posts"
         >
-          <FontAwesomeIcon icon={faReddit} />
+          <FontAwesomeIcon icon={faReddit} size="2x" />
         </button>
       </div>
     </>

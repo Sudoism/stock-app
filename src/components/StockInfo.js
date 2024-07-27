@@ -108,7 +108,11 @@ const StockInfo = ({ data }) => {
         <p className="mb-6">{data.description || 'No description available.'}</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {companyInformation.map((item, index) => (
-            <div key={item.label} className="cursor-pointer" onClick={() => toggleMetric(index)}>
+            <div 
+              key={item.label} 
+              className="cursor-pointer p-2 rounded hover:bg-base-200" 
+              onClick={() => toggleMetric(index)}
+            >
               <div className="text-lg font-bold">{item.value}</div>
               <div className="text-sm text-gray-500">{item.label}</div>
               {expandedMetrics[index] && (
