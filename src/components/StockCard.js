@@ -4,14 +4,30 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar, faCoins, faPen, faTrash, faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 
 const StockCard = ({ stock, formatDate, isToday, onEdit, onDelete }) => {
+  const getCurrencyInfo = (ticker) => {
+    if (ticker.endsWith('.ST')) return { currency: 'SEK', symbol: 'kr' };
+    if (ticker.endsWith('.OL')) return { currency: 'NOK', symbol: 'kr' };
+    return { currency: 'USD', symbol: '$' };
+  };
+
   const formatCurrency = (value) => {
     if (value === null || value === 0) return '';
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+    const { currency, symbol } = getCurrencyInfo(stock.ticker);
+    const formattedValue = new Intl.NumberFormat('en-US', { 
+      style: 'currency', 
+      currency: currency, 
+      maximumFractionDigits: 0 
+    }).format(value);
+    return formattedValue.replace('$', symbol);
   };
 
   const formatPercentage = (value) => {
     if (value === null || value === 0) return '';
-    return new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value / 100);
+    return new Intl.NumberFormat('en-US', { 
+      style: 'percent', 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    }).format(value / 100);
   };
 
   const getChangeColor = (value) => {
@@ -28,9 +44,9 @@ const StockCard = ({ stock, formatDate, isToday, onEdit, onDelete }) => {
           </div>
           <div className="text-right">
             {stock.changeInValuePercentage !== null && stock.changeInValuePercentage !== 0 && (
-              <p className={` font-bold ${getChangeColor(stock.changeInValuePercentage)}`}>
+              <p className={`font-bold ${getChangeColor(stock.changeInValuePercentage)}`}>
                 <FontAwesomeIcon 
-                  icon={stock.changeInValuePercentage > 0 ? faArrowUp : faArrowDown} 
+                  icon={stock.changeInValuePercentage > 0 ? faArrowUp : faArrowDown}
                   className="mr-1"
                 />
                 {formatPercentage(stock.changeInValuePercentage)}
@@ -41,14 +57,13 @@ const StockCard = ({ stock, formatDate, isToday, onEdit, onDelete }) => {
                 {formatCurrency(stock.changeInValue)}
               </p>
             )}
-            
           </div>
         </div>
         <div className="mt-2 space-y-1">
           <p className={`text-xs flex items-center ${isToday ? 'text-success' : 'text-gray-500'}`}>
             <FontAwesomeIcon 
-              icon={faCalendar} 
-              className={`mr-2 ${isToday ? 'text-success' : 'text-gray-400'}`} 
+              icon={faCalendar}
+              className={`mr-2 ${isToday ? 'text-success' : 'text-gray-400'}`}
             />
             Latest Note: {formatDate(stock.latestNoteDate)}
           </p>

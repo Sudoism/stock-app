@@ -52,7 +52,8 @@ const StockDetail = () => {
           getNotes(ticker),
           getCase(ticker),
           getLatestStockPrice(ticker),
-          getYahooStockData(ticker, Math.floor(Date.now() / 1000) - 31536000, Math.floor(Date.now() / 1000), '1d')
+          //getYahooStockData(ticker, Math.floor(Date.now() / 1000) - 31536000, Math.floor(Date.now() / 1000), '1d')
+          getYahooStockData(ticker, Math.floor(Date.now() / 1000) - (31536000 * 2), Math.floor(Date.now() / 1000), '1d')
         ]);
         setStock(stockResponse.data);
         setNotes(notesResponse.data);

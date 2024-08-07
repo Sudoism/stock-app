@@ -20,7 +20,7 @@ const TransactionSummary = ({ notes, ticker, latestPrice }) => {
   const changeInValuePercentage = totalInvested !== 0 ? (changeInValue / totalInvested) * 100 : 0;
 
   const formatCurrency = (value) => {
-    return value != null ? `$${value.toFixed(2)}` : 'N/A';
+    return value != null ? `${value.toFixed(2)}` : 'N/A';
   };
 
   const formatPercentage = (value) => {

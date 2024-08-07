@@ -44,8 +44,8 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
         <p className="text-sm mb-4">{selectedNote.content}</p>
         {hasTransaction && (
           <div className="text-right">
-            <p className="text-sm text-gray-500">${price.toFixed(2)}</p>
-            <p className="text-xs text-gray-400">{quantity} x ${price.toFixed(2)} = ${total.toFixed(2)}</p>
+            <p className="text-sm text-gray-500">{price.toFixed(2)}</p>
+            <p className="text-xs text-gray-400">{quantity} x {price.toFixed(2)} = {total.toFixed(2)}</p>
           </div>
         )}
       </div>
@@ -82,7 +82,7 @@ const NotesCard = ({ notes, selectedNote, setSelectedNote, updateNote, deleteNot
                     <p className="text-sm truncate mb-1">{note.content}</p>
                     {note.transactionType && note.price && (
                       <div className="text-right">
-                        <p className="text-xs text-gray-500">${parseFloat(note.price).toFixed(2)}</p>
+                        <p className="text-xs text-gray-500">{parseFloat(note.price).toFixed(2)}</p>
                       </div>
                     )}
                   </div>
