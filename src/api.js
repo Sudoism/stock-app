@@ -37,7 +37,7 @@ const cachedGet = async (url) => {
   return response;
 };
 
-export const getStocksWithDetails = () => axios.get(`${API_URL}/stocks/with-details`);
+export const getStocksWithDetails = () => cachedGet(`${API_URL}/stocks/with-details`);
 export const getStocks = () => axios.get(`${API_URL}/stocks`);
 export const getStock = (ticker) => axios.get(`${API_URL}/stocks/${ticker}`);
 export const createStock = (data) => axios.post(`${API_URL}/stocks`, data);

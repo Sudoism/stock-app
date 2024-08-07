@@ -22,6 +22,10 @@ const Drawer = ({
   bullBearData,
   stockName 
 }) => {
+  const isUSStock = (ticker) => {
+    return !/\.[A-Z]+$/.test(ticker);
+  };
+
   const toggleDrawer = (drawerName) => {
     setActiveDrawers(prevDrawers => {
       if (prevDrawers.includes(drawerName)) {
@@ -49,13 +53,13 @@ const Drawer = ({
             );
             break;
           case 'info':
-            content = <StockInfo data={stockInfoData} />;
+            content = isUSStock(ticker) ? <StockInfo data={stockInfoData} /> : null;
             break;
           case 'news':
-            content = <NewsSentiment data={newsSentimentData} />;
+            content = isUSStock(ticker) ? <NewsSentiment data={newsSentimentData} /> : null;
             break;
           case 'financial':
-            content = <FinancialHealth data={financialData} />;
+            content = isUSStock(ticker) ? <FinancialHealth data={financialData} /> : null;
             break;
           case 'bullbear':
             content = <BullBearCase data={bullBearData} />;
@@ -66,7 +70,7 @@ const Drawer = ({
           default:
             return null;
         }
-        return (
+        return content && (
           <div key={drawerName} className={`${index < filteredArray.length - 1 ? 'pb-2' : ''}`}>
             {content}
           </div>
@@ -90,27 +94,31 @@ const Drawer = ({
         >
           <FontAwesomeIcon icon={faFolder} size="2x" />
         </button>
-        <button 
-          onClick={() => toggleDrawer('info')} 
-          className={`btn btn-circle ${activeDrawers.includes('info') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="Stock Info"
-        >
-          <FontAwesomeIcon icon={faInfoCircle} size="2x" />
-        </button>
-        <button 
-          onClick={() => toggleDrawer('financial')} 
-          className={`btn btn-circle ${activeDrawers.includes('financial') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="Financial Health"
-        >
-          <FontAwesomeIcon icon={faChartBar} size="2x" />
-        </button>
-        <button 
-          onClick={() => toggleDrawer('news')} 
-          className={`btn btn-circle ${activeDrawers.includes('news') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-          title="News Sentiment"
-        >
-          <FontAwesomeIcon icon={faNewspaper} size="2x" />
-        </button>
+        {isUSStock(ticker) && (
+          <>
+            <button 
+              onClick={() => toggleDrawer('info')} 
+              className={`btn btn-circle ${activeDrawers.includes('info') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+              title="Stock Info"
+            >
+              <FontAwesomeIcon icon={faInfoCircle} size="2x" />
+            </button>
+            <button 
+              onClick={() => toggleDrawer('financial')} 
+              className={`btn btn-circle ${activeDrawers.includes('financial') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+              title="Financial Health"
+            >
+              <FontAwesomeIcon icon={faChartBar} size="2x" />
+            </button>
+            <button 
+              onClick={() => toggleDrawer('news')} 
+              className={`btn btn-circle ${activeDrawers.includes('news') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+              title="News Sentiment"
+            >
+              <FontAwesomeIcon icon={faNewspaper} size="2x" />
+            </button>
+          </>
+        )}
         <button 
           onClick={() => toggleDrawer('bullbear')} 
           className={`btn btn-circle ${activeDrawers.includes('bullbear') ? 'btn-primary' : 'btn-ghost bg-base-100'}`}

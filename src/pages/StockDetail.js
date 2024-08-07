@@ -38,7 +38,10 @@ const StockDetail = () => {
   const [stockChartData, setStockChartData] = useState(null);
 
   const [isMainDataLoaded, setIsMainDataLoaded] = useState(false);
-  const [isAdditionalDataLoaded, setIsAdditionalDataLoaded] = useState(false);
+
+  const isUSStock = (ticker) => {
+    return !/\.[A-Z]+$/.test(ticker);
+  };
 
   useEffect(() => {
     const fetchMainData = async () => {
@@ -67,19 +70,27 @@ const StockDetail = () => {
   useEffect(() => {
     if (isMainDataLoaded) {
       const fetchAdditionalData = async () => {
-        setIsAdditionalDataLoaded(false);
         try {
-          const [newsSentiment, financialStatement, stockInfo, bullBearCase] = await Promise.all([
-            getNewsSentiment(ticker),
-            getFinancialStatement(ticker),
-            getStockInfo(ticker),
-            getBullBearCase(ticker)
-          ]);
-          setNewsSentimentData(newsSentiment.data);
-          setFinancialData(financialStatement.data);
-          setStockInfoData(stockInfo.data[0]);
-          setBullBearData(bullBearCase.data);
-          setIsAdditionalDataLoaded(true);
+          const promises = [getBullBearCase(ticker)];
+
+          if (isUSStock(ticker)) {
+            promises.push(
+              getNewsSentiment(ticker),
+              getFinancialStatement(ticker),
+              getStockInfo(ticker)
+            );
+          }
+
+          const results = await Promise.all(promises);
+
+          setBullBearData(results[0].data);
+
+          if (isUSStock(ticker)) {
+            setNewsSentimentData(results[1].data);
+            setFinancialData(results[2].data);
+            setStockInfoData(results[3].data[0]);
+          }
+
         } catch (error) {
           console.error('Failed to fetch additional data:', error);
         }
@@ -87,18 +98,6 @@ const StockDetail = () => {
       fetchAdditionalData();
     }
   }, [ticker, isMainDataLoaded]);
-
-  useEffect(() => {
-    const fetchBullBearCase = async () => {
-      try {
-        const bullBearCase = await getBullBearCase(ticker);
-        setBullBearData(bullBearCase.data);
-      } catch (error) {
-        console.error('Failed to fetch bull/bear data:', error);
-      }
-    };
-    fetchBullBearCase();
-  }, [ticker]);
 
   const addNote = async (note) => {
     try {
@@ -201,7 +200,6 @@ const StockDetail = () => {
           newsSentimentData={newsSentimentData}
           financialData={financialData}
           bullBearData={bullBearData}
-          isLoading={!isAdditionalDataLoaded}
         />
       </div>
       <AddNoteModal

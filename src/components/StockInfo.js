@@ -33,7 +33,7 @@ const StockInfo = ({ data }) => {
 
   const companyInformation = [
     { 
-      label: 'Full Time Employees', 
+      label: 'Employees', 
       value: formatEmployeeCount(data.fullTimeEmployees),
       description: `Number of full-time employees. Can indicate the company's size, operational scale, and potential for future growth or cost-cutting.`
     },
