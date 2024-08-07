@@ -19,8 +19,19 @@ const TransactionSummary = ({ notes, ticker, latestPrice }) => {
   const changeInValue = totalValue - totalInvested;
   const changeInValuePercentage = totalInvested !== 0 ? (changeInValue / totalInvested) * 100 : 0;
 
+  const getCurrencyPrefix = (ticker) => {
+    if (ticker.endsWith('.ST')) return 'SEK ';
+    if (ticker.endsWith('.OL')) return 'NOK ';
+    return '$';
+  };
+
   const formatCurrency = (value) => {
-    return value != null ? `${value.toFixed(2)}` : 'N/A';
+    if (value == null) return 'N/A';
+    return new Intl.NumberFormat('en-US', { 
+      style: 'decimal', 
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2 
+    }).format(value);
   };
 
   const formatPercentage = (value) => {
@@ -33,6 +44,8 @@ const TransactionSummary = ({ notes, ticker, latestPrice }) => {
     return '';
   };
 
+  const currencyPrefix = getCurrencyPrefix(ticker);
+
   const summaryData = [
     { 
       label: 'Shares Owned', 
@@ -41,7 +54,7 @@ const TransactionSummary = ({ notes, ticker, latestPrice }) => {
     },
     { 
       label: 'Current Holdings Value', 
-      value: formatCurrency(currentValue),
+      value: `${currencyPrefix}${formatCurrency(currentValue)}`,
       details: latestPrice ? `${Math.floor(totalShares)} shares × ${formatCurrency(latestPrice)} (latest quote)` : null
     },
     { 
