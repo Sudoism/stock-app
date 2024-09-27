@@ -17,7 +17,8 @@ const cachedAxiosGet = async (url, params) => {
 };
 
 const getYahooStockData = async (symbol, period1, period2, interval) => {
-  return cachedAxiosGet(`https://query1.finance.yahoo.com/v7/finance/download/${symbol}`, {
+  //return cachedAxiosGet(`https://query1.finance.yahoo.com/v7/finance/download/${symbol}`, {
+    return cachedAxiosGet(`https://query2.finance.yahoo.com/v8/finance/chart/${symbol}`, {
     period1,
     period2,
     interval,
@@ -221,17 +222,42 @@ const getLatestStockPrice = async (symbol) => {
       interval: '1d'
     });
 
-    const lines = data.split('\n').filter(line => line.trim() !== '');
-    if (lines.length < 2) throw new Error('No data available');
+    // Check if the response has the expected structure
+    if (
+      !data.chart ||
+      !data.chart.result ||
+      !Array.isArray(data.chart.result) ||
+      data.chart.result.length === 0
+    ) {
+      throw new Error('Invalid data structure');
+    }
 
-    const lastLine = lines[lines.length - 1];
-    const columns = lastLine.split(',');
-    if (columns.length < 5) throw new Error('Invalid data format');
+    const result = data.chart.result[0];
 
-    const closePrice = parseFloat(columns[4]);
-    if (isNaN(closePrice)) throw new Error('Invalid price data');
+    if (
+      !result.indicators ||
+      !result.indicators.quote ||
+      !Array.isArray(result.indicators.quote) ||
+      result.indicators.quote.length === 0
+    ) {
+      throw new Error('No quote data available');
+    }
 
-    return closePrice;
+    const quotes = result.indicators.quote[0];
+
+    if (!quotes.close || !Array.isArray(quotes.close) || quotes.close.length === 0) {
+      throw new Error('No close prices available');
+    }
+
+    // Get the latest non-null close price
+    for (let i = quotes.close.length - 1; i >= 0; i--) {
+      const closePrice = quotes.close[i];
+      if (closePrice !== null && closePrice !== undefined) {
+        return closePrice;
+      }
+    }
+
+    throw new Error('No valid close price found');
   } catch (error) {
     console.error('Error fetching latest price:', error);
     throw error;

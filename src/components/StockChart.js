@@ -1,19 +1,70 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
+import PropTypes from 'prop-types'; // Optional: For prop type validation
 
 function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData }) {
   const [data, setData] = useState([]);
   const svgRef = useRef(null);
   const containerRef = useRef(null);
 
+  // Helper function to extract data from JSON
+  const extractDataFromJSON = (jsonData) => {
+    if (
+      !jsonData.chart ||
+      !jsonData.chart.result ||
+      !Array.isArray(jsonData.chart.result) ||
+      jsonData.chart.result.length === 0
+    ) {
+      console.error('Invalid JSON structure:', jsonData);
+      return [];
+    }
+
+    const result = jsonData.chart.result[0];
+    const timestamps = result.timestamp;
+    const closes = result.indicators.quote[0].close;
+
+    if (!timestamps || !closes || timestamps.length !== closes.length) {
+      console.error('Timestamps and closing prices are mismatched:', { timestamps, closes });
+      return [];
+    }
+
+    return timestamps.map((ts, idx) => ({
+      date: new Date(ts * 1000), // Convert UNIX timestamp to JavaScript Date object
+      price: closes[idx],
+    })).filter(d => d.date && d.price != null);
+  };
+
+  // Helper function to find the nearest data point
+  const getNearestDataPoint = (date, data) => {
+    // Ensure data is sorted by date in ascending order
+    const sortedData = data.slice().sort((a, b) => a.date - b.date);
+
+    // Use d3.bisector to find the insertion point
+    const bisect = d3.bisector(d => d.date).left;
+    const index = bisect(sortedData, date);
+
+    if (index === 0) {
+      return sortedData[0];
+    } else if (index >= sortedData.length) {
+      return sortedData[sortedData.length - 1];
+    } else {
+      const d0 = sortedData[index - 1];
+      const d1 = sortedData[index];
+      // Choose the closest date on or before the note date
+      return date - d0.date > d1.date - date ? d1 : d0;
+    }
+  };
+
   useEffect(() => {
     if (!chartData) return;
 
-    const parsedData = d3.csvParse(chartData);
-    parsedData.forEach(d => {
-      d.date = d3.timeParse("%Y-%m-%d")(d.Date);
-      d.price = +d['Close'];
-    });
+    // Ensure chartData is an object
+    if (typeof chartData !== 'object') {
+      console.error('chartData is not a JSON object:', chartData);
+      return;
+    }
+
+    const parsedData = extractDataFromJSON(chartData);
     setData(parsedData);
   }, [chartData]);
 
@@ -23,7 +74,7 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
     const drawChart = () => {
       const container = containerRef.current;
       const svg = d3.select(svgRef.current);
-      svg.selectAll('*').remove();
+      svg.selectAll('*').remove(); // Clear previous chart
 
       const aspectRatio = 16 / 9;
       const containerWidth = container.clientWidth;
@@ -63,14 +114,17 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
         .x(d => x(d.date))
         .y(d => y(d.price));
 
+      // Add X Axis
       svg.append('g')
         .attr('transform', `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0));
 
+      // Add Y Axis
       svg.append('g')
         .attr('transform', `translate(${margin.left},0)`)
         .call(d3.axisLeft(y));
 
+      // Add Line Path
       svg.append('path')
         .datum(data)
         .attr('fill', 'none')
@@ -80,7 +134,7 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
 
       const latestDataPoint = data[data.length - 1];
 
-      // Add hover functionality
+      // Add Hover Functionality
       const focus = svg.append('g')
         .attr('class', 'focus')
         .style('display', 'none');
@@ -124,7 +178,8 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
       const bisectDate = d3.bisector(d => d.date).left;
 
       function mousemove(event) {
-        const x0 = x.invert(d3.pointer(event)[0]);
+        const [mouseX] = d3.pointer(event);
+        const x0 = x.invert(mouseX);
         const i = bisectDate(data, x0, 1);
         if (i >= data.length) return;
         const d0 = data[i - 1];
@@ -136,6 +191,7 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
         focus.select('.tooltip-price').text(`${d.price.toFixed(2)}`);
       }
 
+      // Plotting Notes
       notes.forEach(note => {
         const dateString = note.noteDate.split('T')[0];
         const noteDate = d3.timeParse("%Y-%m-%d")(dateString);
@@ -144,10 +200,13 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
           return;
         }
 
-        let noteData = data.find(d => d.date && d.date.getTime() === noteDate.getTime());
-        
+        // Find the nearest data point on or before the note date
+        const noteData = getNearestDataPoint(noteDate, data) || latestDataPoint;
+
+        // Check if noteData exists
         if (!noteData) {
-          noteData = {...latestDataPoint, date: noteDate};
+          console.error('No data point found for note:', note);
+          return;
         }
 
         const isSelected = selectedNote && selectedNote.id === note.id;
@@ -156,7 +215,7 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
         if (note.transactionType === 'sell') fillColor = 'rgb(239, 68, 68)';
 
         const group = svg.append('g')
-          .attr('transform', `translate(${x(noteDate)},${y(noteData.price)})`)
+          .attr('transform', `translate(${x(noteData.date)},${y(noteData.price)})`)
           .on('click', (event) => {
             event.stopPropagation();
             setSelectedNote(note);
@@ -220,5 +279,13 @@ function StockChart({ ticker, notes, selectedNote, setSelectedNote, chartData })
     </div>
   );
 }
+
+StockChart.propTypes = {
+  ticker: PropTypes.string.isRequired,
+  notes: PropTypes.arrayOf(PropTypes.object).isRequired,
+  selectedNote: PropTypes.object,
+  setSelectedNote: PropTypes.func.isRequired,
+  chartData: PropTypes.object.isRequired,
+};
 
 export default StockChart;
