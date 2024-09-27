@@ -81,11 +81,13 @@ Change: ${formatCurrency(changeInValue)}`,
     <div className="stats w-full bg-base-100 shadow-lg">
       {summaryData.map((item, index) => (
         <div key={index} className="stat px-4 py-2">
-          <div className="stat-title">{item.label}</div>
-          <div className="flex items-center justify-between">
-            <div className={`stat-value ${item.valueClass || ''} mr-4`}>{item.value}</div>
+          <div className="flex justify-between items-end">
+            <div className="flex flex-col items-start">
+              <div className={`stat-value ${item.valueClass || ''}`}>{item.value}</div>
+              <div className="stat-title text-sm text-gray-500">{item.label}</div>
+            </div>
             {item.details && (
-              <div className="stat-desc text-base text-right">{item.details}</div>
+              <div className="stat-desc text-xs text-right">{item.details}</div>
             )}
           </div>
         </div>

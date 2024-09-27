@@ -53,7 +53,7 @@ const StockDetail = () => {
           getCase(ticker),
           getLatestStockPrice(ticker),
           //getYahooStockData(ticker, Math.floor(Date.now() / 1000) - 31536000, Math.floor(Date.now() / 1000), '1d')
-          getYahooStockData(ticker, Math.floor(Date.now() / 1000) - (31536000 * 2), Math.floor(Date.now() / 1000), '1d')
+          getYahooStockData(ticker, Math.floor(Date.now() / 1000) - (365 * 24 * 60 * 60 * 2.5), Math.floor(Date.now() / 1000), '1d')
         ]);
         setStock(stockResponse.data);
         setNotes(notesResponse.data);
@@ -69,6 +69,38 @@ const StockDetail = () => {
   }, [ticker]);
 
   useEffect(() => {
+    if (isMainDataLoaded) {
+      const fetchAdditionalData = async () => {
+        try {
+          const promises = [getBullBearCase(ticker)];
+
+          if (isUSStock(ticker)) {
+            promises.push(
+              getNewsSentiment(ticker),
+              getFinancialStatement(ticker),
+              getStockInfo(ticker)
+            );
+          }
+
+          const results = await Promise.all(promises);
+
+          setBullBearData(results[0].data);
+
+          if (isUSStock(ticker)) {
+            setNewsSentimentData(results[1].data);
+            setFinancialData(results[2].data);
+            setStockInfoData(results[3].data[0]);
+          }
+
+        } catch (error) {
+          console.error('Failed to fetch additional data:', error);
+        }
+      };
+      fetchAdditionalData();
+    }
+  }, [ticker, isMainDataLoaded]);
+
+   useEffect(() => {
     if (isMainDataLoaded) {
       const fetchAdditionalData = async () => {
         try {
